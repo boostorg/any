@@ -9,7 +9,7 @@
 #include <string>
 #include <utility>
 #include "boost/move/move.hpp"
-#include "boost/visitor/unary_apply_visitor.hpp"
+#include "boost/visitor/apply_visitor_unary.hpp"
 #include "boost/visitor/dynamic_visitor_base.hpp"
 #include "boost/visitor/dynamic_visitor_interface.hpp"
 
