@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include <string>
 #include <utility>
-#include "boost/move_fwd.hpp"
+#include "boost/move/move.hpp"
 #include "boost/visitor/unary_apply_visitor.hpp"
 #include "boost/visitor/dynamic_visitor_base.hpp"
 #include "boost/visitor/dynamic_visitor_interface.hpp"
