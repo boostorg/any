@@ -154,7 +154,8 @@ namespace boost
 
             virtual void apply_visitor(dynamic_visitor_base & visitor)
             {
-                try_dynamic_visit(visitor, held);
+                if (!try_dynamic_visit(visitor, held))
+                    throw bad_visit();
             }
 
         public: // representation
