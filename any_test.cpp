@@ -1,10 +1,11 @@
 // what:  unit tests for variant type boost::any
 // who:   contributed by Kevlin Henney
-// when:  July 2001, 2013
+// when:  July 2001, 2013, 2014
 // where: tested with BCC 5.5, MSVC 6.0, and g++ 2.95
 
 #include <cstdlib>
 #include <string>
+#include <vector>
 #include <utility>
 
 #include "boost/any.hpp"
@@ -39,6 +40,7 @@ namespace any_tests // test suite
     void test_with_array();
     void test_with_func();
     void test_clear();
+    void test_vectors();
 
     const test_case test_cases[] =
     {
@@ -53,7 +55,8 @@ namespace any_tests // test suite
         { "cast to reference types",        test_cast_to_reference },
         { "storing an array inside",        test_with_array        },
         { "implicit cast of returned value",test_with_func         },
-        { "clear() methods",                test_clear             }
+        { "clear() methods",                test_clear             },
+        { "testing with vectors",           test_vectors           }
     };
 
     const test_case_iterator begin = test_cases;
@@ -292,7 +295,7 @@ namespace any_tests // test definitions
         s = any_cast<std::string>(returning_string2());
         s = any_cast<const std::string&>(returning_string2());
 
-#if (!defined(_MSC_VER) || _MSC_VER != 1600) && !defined(BOOST_NO_CXX11_RVALUE_REFERENCES) 
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES) 
 #if !defined(__INTEL_COMPILER) && !defined(__ICL)
         // Intel compiler thinks that it must choose the `any_cast(const any&)` function 
         // instead of the `any_cast(const any&&)`.
@@ -324,10 +327,32 @@ namespace any_tests // test definitions
         value.clear();
         check_true(value.empty(), "non-empty after clear");
     }
+
+    // Following tests cover the case from #9462
+    // https://svn.boost.org/trac/boost/ticket/9462
+    boost::any makeVec() 
+    {
+        return std::vector<int>(100 /*size*/, 7 /*value*/);
+    }
+
+    void test_vectors() 
+    {
+        const std::vector<int>& vec = boost::any_cast<std::vector<int> >(makeVec()); 
+        check_equal(vec.size(), 100u, "size of vector extracted from boost::any"); 
+        check_equal(vec.back(), 7, "back value of vector extracted from boost::any");
+        check_equal(vec.front(), 7, "front value of vector extracted from boost::any");
+
+        std::vector<int> vec1 = boost::any_cast<std::vector<int> >(makeVec()); 
+        check_equal(vec1.size(), 100u, "size of second vector extracted from boost::any"); 
+        check_equal(vec1.back(), 7, "back value of second vector extracted from boost::any");
+        check_equal(vec1.front(), 7, "front value of second vector extracted from boost::any");
+
+    } 
+
 }
 
 // Copyright Kevlin Henney, 2000, 2001. All rights reserved.
-// Copyright Antony Polukhin, 2013.
+// Copyright Antony Polukhin, 2013-2014.
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
