@@ -40,11 +40,6 @@
 #include <cstring>
 # endif 
 
-#if defined(_MSC_VER) 
-#pragma warning(push)
-#pragma warning(disable: 4172) // Mistakenly warns: returning address of local variable or temporary
-#endif
-
 namespace boost
 {
     class any
@@ -293,21 +288,19 @@ namespace boost
     inline ValueType any_cast(const any & operand)
     {
         typedef BOOST_DEDUCED_TYPENAME remove_reference<ValueType>::type nonref;
-
-
         return any_cast<const nonref &>(const_cast<any &>(operand));
     }
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     template<typename ValueType>
-    inline ValueType&& any_cast(any&& operand)
+    inline ValueType any_cast(any&& operand)
     {
         BOOST_STATIC_ASSERT_MSG(
-            boost::is_rvalue_reference<ValueType&&>::value 
+            boost::is_rvalue_reference<ValueType&&>::value /*true if ValueType is rvalue or just a value*/
             || boost::is_const< typename boost::remove_reference<ValueType>::type >::value,
             "boost::any_cast shall not be used for getting nonconst references to temporary objects" 
         );
-        return any_cast<ValueType&&>(operand);
+        return any_cast<ValueType>(operand);
     }
 #endif
 
@@ -335,9 +328,5 @@ namespace boost
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
 
 #endif

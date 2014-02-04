@@ -499,7 +499,19 @@ public:
               <paramtype><classname>any</classname> &amp;</paramtype>
             </parameter>
           </signature>
-          
+
+          <signature>
+            <template>
+              <template-type-parameter name="T"/>
+            </template>
+
+            <type>T</type>
+
+            <parameter name="operand">
+              <paramtype><classname>any</classname> &amp;&amp;</paramtype>
+            </parameter>
+          </signature>
+
           <signature>
             <template>
               <template-type-parameter name="T"/>
