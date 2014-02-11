@@ -296,13 +296,23 @@ namespace any_tests // test definitions
         s = any_cast<const std::string&>(returning_string2());
 
 #if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES) 
-#if !defined(__INTEL_COMPILER) && !defined(__ICL)
+#if !defined(__INTEL_COMPILER) && !defined(__ICL) && (!defined(_MSC_VER) || _MSC_VER != 1600)
         // Intel compiler thinks that it must choose the `any_cast(const any&)` function 
         // instead of the `any_cast(const any&&)`.
         // Bug was not reported because of missing premier support account + annoying 
         // registrations requirements.
+
+        // MSVC-10 had a bug:
+        //
+        // any.hpp(291) : error C2440: 'return' : cannot convert.
+        // Conversion loses qualifiers
+        // any_test.cpp(304) : see reference to function template instantiation
+        //
+        // This issue was fixed in MSVC-11.
+
         s = any_cast<std::string&&>(returning_string1());
 #endif
+
         s = any_cast<std::string&&>(returning_string2());
 #endif
     }
