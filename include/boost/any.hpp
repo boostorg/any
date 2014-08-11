@@ -20,6 +20,7 @@
 #include "boost/config.hpp"
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/type_traits/decay.hpp>
+#include <boost/type_traits/remove_cv.hpp>
 #include <boost/type_traits/add_reference.hpp>
 #include <boost/type_traits/is_reference.hpp>
 #include <boost/type_traits/is_const.hpp>
@@ -53,7 +54,9 @@ namespace boost
 
         template<typename ValueType>
         any(const ValueType & value)
-          : content(new holder<BOOST_DEDUCED_TYPENAME decay<const ValueType>::type>(value))
+          : content(new holder<
+                BOOST_DEDUCED_TYPENAME remove_cv<BOOST_DEDUCED_TYPENAME decay<const ValueType>::type>::type
+            >(value))
         {
         }
 
@@ -251,7 +254,7 @@ namespace boost
 #else
             operand->type() == typeid(ValueType)
 #endif
-            ? &static_cast<any::holder<ValueType> *>(operand->content)->held
+            ? &static_cast<any::holder<BOOST_DEDUCED_TYPENAME remove_cv<ValueType>::type> *>(operand->content)->held
             : 0;
     }
 
