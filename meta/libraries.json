@@ -1,0 +1,14 @@
+{
+    "key": "any",
+    "name": "Any",
+    "authors": [
+        "Kevlin Henney"
+    ],
+    "description": "Safe, generic container for single values of different value types.",
+    "category": [
+        "Data"
+    ],
+    "maintainers": [
+        "Alexander Nasonov <alexander.nasonov -at- gmail.com>"
+    ]
+}
