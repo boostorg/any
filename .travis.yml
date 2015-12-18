@@ -56,7 +56,7 @@ addons:
 before_install:
     # Set this to the name of the library
     - PROJECT_TO_TEST=`basename $TRAVIS_BUILD_DIR`
-    - echo "Testing $PROJECT_TO_TEST"
+    - echo "Testing $PROJECT_TO_TEST, to remove $BOOST/libs/$BOOST_REMOVE, testing branch $BRANCH_TO_TEST"
     # Cloning Boost libraries (fast nondeep cloning)
     - BOOST=$HOME/boost-local
     - git init $BOOST
@@ -73,7 +73,7 @@ before_install:
     - git reset --hard; git clean -fxd
     - git status
     - rm -rf $BOOST/libs/$BOOST_REMOVE
-    - mv $TRAVIS_BUILD_DIR/../$PROJECT_TO_TEST/ $BOOST/libs/$PROJECT_TO_TEST
+    - mv $TRAVIS_BUILD_DIR $BOOST/libs/$PROJECT_TO_TEST
     - TRAVIS_BUILD_DIR=$BOOST/libs/$PROJECT_TO_TEST
     - ./bootstrap.sh
     - ./b2 headers
