@@ -12,7 +12,7 @@
 
 init:
     - set BRANCH_TO_TEST=%APPVEYOR_REPO_BRANCH%
-    - set BOOST_REMOVE=lexical_cast
+    - set BOOST_REMOVE=any
 
 os: Visual Studio 2015
 configuration: Debug
