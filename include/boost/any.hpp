@@ -16,7 +16,7 @@
 
 #include <algorithm>
 
-#include "boost/config.hpp"
+#include <boost/config.hpp>
 #include <boost/type_index.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/type_traits/decay.hpp>

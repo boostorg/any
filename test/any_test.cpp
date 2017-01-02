@@ -8,7 +8,7 @@
 #include <vector>
 #include <utility>
 
-#include "boost/any.hpp"
+#include <boost/any.hpp>
 #include "test.hpp"
 
 namespace any_tests
