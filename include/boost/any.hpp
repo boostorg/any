@@ -277,7 +277,14 @@ namespace boost
             BOOST_DEDUCED_TYPENAME boost::add_reference<ValueType>::type
         >::type ref_type;
 
+#ifdef BOOST_MSVC
+#   pragma warning(push)
+#   pragma warning(disable: 4172) // "returning address of local variable or temporary" but *result is not local!
+#endif
         return static_cast<ref_type>(*result);
+#ifdef BOOST_MSVC
+#   pragma warning(pop)
+#endif
     }
 
     template<typename ValueType>
