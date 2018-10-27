@@ -149,7 +149,7 @@ namespace boost
     public: // types (public so any_cast can be non-friend)
 #endif
 
-        class placeholder
+        class BOOST_SYMBOL_VISIBLE placeholder
         {
         public: // structors
 
