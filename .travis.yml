@@ -39,28 +39,28 @@ env:
 # `--coverage` flags required to generate coverage info for Coveralls
 matrix:
   include:
-    - env: B2_ARGS='cxxstd=98,03,11,14,1y toolset=gcc-6 cxxflags=\"--coverage -fsanitize=address,leak,undefined -DBOOST_TRAVISCI_BUILD -fno-rtti\" linkflags=\"--coverage -lasan -lubsan\"'
+    - env: B2_ARGS='../../../b2 -j2 cxxstd=98,03,11,14,1y toolset=gcc-6 cxxflags="--coverage -fsanitize=address,leak,undefined -DBOOST_TRAVISCI_BUILD -fno-rtti" linkflags="--coverage -lasan -lubsan"'
       name: "GCC-6, no RTTI"
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
           packages: g++-6
 
-    - env: B2_ARGS='cxxstd=98,03,11,14,1y toolset=gcc-8 cxxflags=\"--coverage -fsanitize=address,leak,undefined -DBOOST_TRAVISCI_BUILD\" linkflags=\"--coverage -lasan -lubsan\"'
+    - env: B2_ARGS='../../../b2 -j2 cxxstd=98,03,11,14,1y toolset=gcc-8 cxxflags="--coverage -fsanitize=address,leak,undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage -lasan -lubsan"'
       name: "GCC-8"
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
           packages: g++-8
 
-    - env: B2_ARGS='cxxstd=98,03,11,14,1y toolset=gcc-8 cxxflags=\"--coverage -fsanitize=address,leak,undefined -DBOOST_TRAVISCI_BUILD -fno-exceptions\" linkflags=\"--coverage -lasan -lubsan\"'
+    - env: B2_ARGS='../../../b2 -j2 cxxstd=98,03,11,14,1y toolset=gcc-8 cxxflags="--coverage -fsanitize=address,leak,undefined -DBOOST_TRAVISCI_BUILD -fno-exceptions" linkflags="--coverage -lasan -lubsan"'
       name: "GCC-8, no exceptions"
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
           packages: g++-8
 
-    - env: B2_ARGS='cxxstd=98,03,11,14,1z toolset=clang-5 cxxflags=\"--coverage -fsanitize=address,leak,undefined -DBOOST_TRAVISCI_BUILD\" linkflags=\"--coverage -lasan -lubsan\"'
+    - env: B2_ARGS='../../../b2 -j2 cxxstd=98,03,11,14,1z toolset=clang-5 cxxflags="--coverage -fsanitize=address,leak,undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage -lasan -lubsan"'
       name: "Clang-5"
       addons:
         apt:
@@ -107,7 +107,7 @@ before_install:
     - cd $BOOST/libs/$PROJECT_TO_TEST/test/
 
 script:
-    - ../../../b2 -j2 $B2_ARGS
+    - sh -c "$B2_ARGS"
 
 after_success:
     # Copying Coveralls data to a separate folder
