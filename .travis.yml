@@ -37,6 +37,7 @@ env:
         - BOOST_REMOVE=$(basename $TRAVIS_BUILD_DIR)
 
 matrix:
+  include:
     # Note that "--coverage -fsanitize=address,leak,undefined -DBOOST_TRAVISCI_BUILD" are added automatically lower in code
     - env: CXXSTD=98 CXX_FLAGS="" LINK_FLAGS="" TOOLSET=gcc-6
     - env: CXXSTD=11 CXX_FLAGS="" LINK_FLAGS="" TOOLSET=gcc-6
