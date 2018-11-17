@@ -299,7 +299,9 @@ script:
     # `--coverage` flags required to generate coverage info for Coveralls
   - |-
     echo "using $TOOLSET : : $COMPILER ;" > ~/user-config.jam
-    - ../../../b2 -j3 "testing.launcher=LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libasan.so.3 " toolset=$TOOLSET cxxstd=$CXXSTD ${VARIANT:+variant=$VARIANT} cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="$LINKFLAGS --coverage -lasan -lubsan"
+    - echo ../../../b2 -j3 "testing.launcher=LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libasan.so.3 " toolset=$TOOLSET cxxstd=$CXXSTD ${VARIANT:+variant=$VARIANT} cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="$LINKFLAGS --coverage -lasan -lubsan"
+    - cat ~/user-config.jam
+    - ../../../b2 -j3 "testing.launcher=LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libasan.so.3 " toolset=$TOOLSET cxxstd=$CXXSTD ${VARIANT:+variant=$VARIANT} cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="$LINKFLAGS --coverage -lasan -lubsan" -d+2
 
 after_success:
     # Copying Coveralls data to a separate folder
