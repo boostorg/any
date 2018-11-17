@@ -296,9 +296,9 @@ before_install:
     - cd $BOOST/libs/$PROJECT_TO_TEST/test/
 
 script:
+    # `--coverage` flags required to generate coverage info for Coveralls
   - |-
     echo "using $TOOLSET : : $COMPILER ;" > ~/user-config.jam
-    # `--coverage` flags required to generate coverage info for Coveralls
     - ../../../b2 -j3 "testing.launcher=LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libasan.so.3 " toolset=$TOOLSET cxxstd=$CXXSTD ${VARIANT:+variant=$VARIANT} cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="$LINKFLAGS --coverage -lasan -lubsan"
 
 after_success:
