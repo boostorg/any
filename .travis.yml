@@ -23,7 +23,7 @@ env:
     global:
         # Autodetect Boost branch by using the following code: - BRANCH_TO_TEST=$TRAVIS_BRANCH
         # or just directly specify it
-        - BRANCH_TO_TEST=$TRAVIS_BRANCH
+        - BRANCH_TO_TEST=develop && [ "$TRAVIS_BRANCH" == "master" ] && BOOST_BRANCH=master || true
 
         # Files, which coverage results must be ignored (files from other projects).
         # Example: - IGNORE_COVERAGE='*/boost/progress.hpp */filesystem/src/*'
@@ -38,9 +38,9 @@ env:
 
 matrix:
     # Note that "--coverage -fsanitize=address,leak,undefined -DBOOST_TRAVISCI_BUILD" are added automatically lower in code
-    - env: CXX_FLAGS="-std=c++98" LINK_FLAGS="" TOOLSET=gcc-6
-    - env: CXX_FLAGS="-std=c++11" LINK_FLAGS="" TOOLSET=gcc-6
-    - env: CXX_FLAGS="-std=c++1y" LINK_FLAGS="" TOOLSET=gcc-6
+    - env: STDCXX=98 CXX_FLAGS="" LINK_FLAGS="" TOOLSET=gcc-6
+    - env: STDCXX=11 CXX_FLAGS="" LINK_FLAGS="" TOOLSET=gcc-6
+    - env: STDCXX=1y CXX_FLAGS="" LINK_FLAGS="" TOOLSET=gcc-6
     #- CXX_FLAGS="-std=c++11 -stdlib=libc++" LINK_FLAGS="-stdlib=libc++" TOOLSET=clang
     #- CXX_FLAGS="-std=c++1y -stdlib=libc++" LINK_FLAGS="-stdlib=libc++" TOOLSET=clang
 
@@ -60,8 +60,6 @@ addons:
     - python-yaml
     - gcc-6
     - g++-6
-    - clang
-    - libc++-dev
 
 before_install:
     # Set this to the name of the library
@@ -88,7 +86,7 @@ before_install:
 
 script:
     # `--coverage` flags required to generate coverage info for Coveralls
-    - ../../../b2 "testing.launcher=LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libasan.so.3 " address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -fsanitize=address,leak,undefined -DBOOST_TRAVISCI_BUILD $CXX_FLAGS" linkflags="$LINK_FLAGS --coverage -lasan -lubsan"
+    - ../../../b2 -j2 stdcxx=$STDCXX "testing.launcher=LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libasan.so.3 " address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -fsanitize=address,leak,undefined -DBOOST_TRAVISCI_BUILD $CXX_FLAGS" linkflags="$LINK_FLAGS --coverage -lasan -lubsan"
 
 after_success:
     # Copying Coveralls data to a separate folder
