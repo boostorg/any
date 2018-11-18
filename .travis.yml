@@ -114,12 +114,11 @@ before_install:
     - python tools/boostdep/depinst/depinst.py --git_args "--depth 1 --jobs 2" $(basename $TRAVIS_BUILD_DIR)
     - git status
 
-    # Adding missing toolsets
-    - echo "using clang-libc++ : : clang++-libc++ ;" > ~/user-config.jam
-
-    # Preparing Boost headers
+    # Adding missing toolsets and preparing Boost headers
     - ./bootstrap.sh
     - ./b2 headers
+    - |-
+      echo "using clang-libc++ : : clang++-libc++ ;" >> ~/user-config.jam
     - cd $BOOST/libs/$PROJECT_TO_TEST/test/
 
 script:
