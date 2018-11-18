@@ -77,6 +77,7 @@ matrix:
 
     - env: B2_ARGS='cxxstd=03,11,14 toolset=clang-libc++ cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage -fsanitize=address,leak,undefined"'
       name: "Clang-3.8, libc++"
+      sudo: required # Required by leak sanitizer
       addons:
         apt:
           packages: libc++-dev
