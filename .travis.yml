@@ -75,7 +75,7 @@ matrix:
           - llvm-toolchain-trusty-5.0
           packages: clang-5.0
 
-    - env: B2_ARGS='cxxstd=03,11,14 toolset=clang-libc++ cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage -fsanitize=address,leak,undefined"'
+    - env: B2_ARGS='cxxstd=03,11,14 toolset=clang++-libc++ cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage -fsanitize=address,leak,undefined"'
       name: "Clang, libc++"
       sudo: required # Required by leak sanitizer
       addons:
@@ -114,11 +114,9 @@ before_install:
     - python tools/boostdep/depinst/depinst.py --git_args "--depth 1 --jobs 2" $(basename $TRAVIS_BUILD_DIR)
     - git status
 
-    # Adding missing toolsets and preparing Boost headers
+    # Preparing Boost headers
     - ./bootstrap.sh
     - ./b2 headers
-    - |-
-      echo "using clang-libc++ : : clang++-libc++ ;" >> ~/user-config.jam
     - cd $BOOST/libs/$PROJECT_TO_TEST/test/
 
 script:
