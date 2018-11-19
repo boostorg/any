@@ -49,13 +49,20 @@ matrix:
           sources: ubuntu-toolchain-r-test
           packages: g++-6
 
-    - env: B2_ARGS='cxxstd=98,03,11,14,1y toolset=gcc-8 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage -lasan -lubsan"'
+    - env: B2_ARGS='cxxstd=98,03,11,14,1z toolset=gcc-8 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage -fsanitize=address,leak,undefined"'
       name: "GCC-8"
       sudo: required # Required by leak sanitizer
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
           packages: g++-8
+
+    - env: B2_ARGS='cxxstd=98,0x toolset=gcc-4.4 cxxflags="--coverage -DBOOST_TRAVISCI_BUILD" linkflags="--coverage"'
+      name: "GCC-4.4:
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: g++-4.4
 
 #    - env: B2_ARGS='cxxstd=98,03,11,14,1y toolset=gcc-8 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD -fno-exceptions" linkflags="--coverage -lasan -lubsan"'
 #      name: "GCC-8, no exceptions"
