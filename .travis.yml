@@ -58,7 +58,7 @@ matrix:
           packages: g++-8
 
     - env: B2_ARGS='cxxstd=98,0x toolset=gcc-4.4 cxxflags="--coverage -DBOOST_TRAVISCI_BUILD" linkflags="--coverage"'
-      name: "GCC-4.4:
+      name: "GCC-4.4"
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
