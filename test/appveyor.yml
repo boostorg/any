@@ -21,7 +21,8 @@ version: 1.64.{build}-{branch}
  
 # branches to build
 branches:
-  except: gh-pages
+  except:
+    - gh-pages
 
 skip_tags: true
 
