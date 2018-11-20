@@ -77,7 +77,7 @@ test_script:
   - if not "%CXXSTD%" == "" set CXXSTD=cxxstd=%CXXSTD%
   - if not "%ADDRMD%" == "" set ADDRMD=address-model=%ADDRMD%
   - echo "Running command ..\..\..\b2 -j3 toolset=%TOOLSET% %CXXSTD% %ADDRMD% variant=debug,release"
-  - ..\..\..\b2 -j3 toolset=%TOOLSET% %CXXSTD% %ADDRMD% variant=debug,release
+  - ..\..\..\b2.exe -j3 toolset=%TOOLSET% %CXXSTD% %ADDRMD% variant=debug,release cxxflags="-DBOOST_TRAVISCI_BUILD" -sBOOST_BUILD_PATH=.
 
 after_test:
 on_success:
