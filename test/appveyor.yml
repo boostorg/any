@@ -21,8 +21,7 @@ version: 1.64.{build}-{branch}
  
 # branches to build
 branches:
-  except:
-    - gh-pages
+  except: gh-pages
 
 skip_tags: true
 
@@ -31,24 +30,21 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
       TOOLSET: msvc-9.0,msvc-10.0,msvc-11.0,msvc-12.0
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      TOOLSET: msvc-14.1
+      TOOLSET: msvc-14.1,clang-win
       CXXSTD: 14,17
       ADDRMD: 32,64
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
-      ADDPATH: C:\cygwin\bin;
+      ADDPATH: C:\cygwin\bin;C:\cygwin64\bin;
       TOOLSET: gcc
+      ADDRMD: 32,64
       CXXSTD: 03,11,14,1z
+#    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
+#      ADDPATH: C:\cygwin64\bin;
+#      TOOLSET: gcc
+#      CXXSTD: 03,11,14,1z
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
-      ADDPATH: C:\cygwin64\bin;
-      TOOLSET: gcc
-      CXXSTD: 03,11,14,1z
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
-      ADDPATH: C:\mingw\bin;
-      TOOLSET: gcc
-      CXXSTD: 03,11,14,1z
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
-      ADDPATH: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin;
-      TOOLSET: gcc
+      ADDPATH: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin;C:\mingw\bin;
+      TOOLSET: gcc-5,gcc-7
       CXXSTD: 03,11,14,1z
 
 before_build:
