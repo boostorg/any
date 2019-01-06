@@ -2,7 +2,6 @@
 Boost.Any is a part of the [Boost C++ Libraries](http://github.com/boostorg). It is a safe, generic container for single values of different value types.
 
 ### Test results
-
 @               | Build         | Tests coverage | More info
 ----------------|-------------- | -------------- |-----------
 Develop branch: | [![Build Status](https://travis-ci.org/boostorg/any.svg?branch=develop)](https://travis-ci.org/boostorg/any) [![Build status](https://ci.appveyor.com/api/projects/status/dmugl75nfhjnx7ot/branch/develop?svg=true)](https://ci.appveyor.com/project/apolukhin/any/branch/develop) | [![Coverage Status](https://coveralls.io/repos/boostorg/any/badge.png?branch=develop)](https://coveralls.io/r/boostorg/any?branch=develop) | [details...](http://www.boost.org/development/tests/develop/developer/any.html)
