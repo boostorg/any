@@ -166,7 +166,7 @@ namespace boost
         };
 
         template<typename ValueType>
-        class holder : public placeholder
+        class BOOST_SYMBOL_VISIBLE holder : public placeholder
         {
         public: // structors
 
