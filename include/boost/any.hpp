@@ -196,6 +196,9 @@ namespace boost
             }
 #endif
 
+            // Function that replaces multiple virtual functions. In that way
+            // no RTTI emited for each of the `holder` instantiations, binries
+            // become smaller.
             static void* control(const void* self, actions_enum action) {
                 const holder* held = static_cast<const holder*>(self);
 
