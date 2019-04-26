@@ -10,7 +10,7 @@
 // what:  variant type boost::any
 // who:   contributed by Kevlin Henney,
 //        with features contributed and bugs found by
-//        Antony Polukhin, Ed Brey, Mark Rodgers, 
+//        Antony Polukhin, Ed Brey, Mark Rodgers,
 //        Peter Dimov, and James Curran
 // when:  July 2001, April 2013 - 2019
 
@@ -18,6 +18,7 @@
 
 #include <boost/config.hpp>
 #include <boost/type_index.hpp>
+#include <boost/type_traits/aligned_storage.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/type_traits/decay.hpp>
 #include <boost/type_traits/remove_cv.hpp>
@@ -27,7 +28,6 @@
 #include <boost/throw_exception.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/utility/enable_if.hpp>
-#include <boost/core/addressof.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/is_const.hpp>
 #include <boost/type_traits/conditional.hpp>
@@ -76,7 +76,11 @@ namespace boost
 
         ~any() BOOST_NOEXCEPT
         {
-            delete content;
+            if (content)
+            {
+                content->destroy();
+                delete content;
+            }
         }
 
     public: // modifiers
@@ -86,7 +90,6 @@ namespace boost
             std::swap(content, rhs.content);
             return *this;
         }
-
 
 #ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
         template<typename ValueType>
@@ -98,11 +101,10 @@ namespace boost
 
         any & operator=(any rhs)
         {
-            any(rhs).swap(*this);
+            rhs.swap(*this);
             return *this;
         }
-
-#else 
+#else
         any & operator=(const any& rhs)
         {
             any(rhs).swap(*this);
@@ -143,65 +145,90 @@ namespace boost
             return content ? content->type() : boost::typeindex::type_id<void>().type_info();
         }
 
-#ifndef BOOST_NO_MEMBER_TEMPLATE_FRIENDS
     private: // types
-#else
-    public: // types (public so any_cast can be non-friend)
-#endif
 
-        class BOOST_SYMBOL_VISIBLE placeholder
+        enum actions_enum { Destroy, Clone, Type };
+
+        struct placeholder
         {
-        public: // structors
+            inline placeholder() BOOST_NOEXCEPT : control_function(0) {}
 
-            virtual ~placeholder()
+            inline void destroy() BOOST_NOEXCEPT
             {
+                if (control_function)
+                {
+                    control_function(this, Destroy);
+                }
             }
 
-        public: // queries
+            inline const boost::typeindex::type_info& type() const BOOST_NOEXCEPT
+            {
+                return *static_cast<const boost::typeindex::type_info*>(
+                    control_function(this, Type)
+                );
+            }
 
-            virtual const boost::typeindex::type_info& type() const BOOST_NOEXCEPT = 0;
+            inline placeholder* clone() const
+            {
+                return static_cast<placeholder*>(
+                    control_function(this, Clone)
+                );
+            }
 
-            virtual placeholder * clone() const = 0;
-
+            typedef void* (*control_function_t)(const void*, actions_enum);
+            control_function_t control_function;
         };
 
-        template<typename ValueType>
-        class BOOST_SYMBOL_VISIBLE holder : public placeholder
+        template <typename ValueType>
+        struct holder : public placeholder
         {
-        public: // structors
-
             holder(const ValueType & value)
-              : held(value)
             {
+                new (&held) ValueType(value);
+                control_function = &control;
             }
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
             holder(ValueType&& value)
-              : held(static_cast< ValueType&& >(value))
             {
+                new (&held) ValueType(static_cast< ValueType&& >(value));
+                control_function = &control;
             }
 #endif
-        public: // queries
 
-            virtual const boost::typeindex::type_info& type() const BOOST_NOEXCEPT
-            {
-                return boost::typeindex::type_id<ValueType>().type_info();
+            static void* control(const void* self, actions_enum action) {
+                const holder* held = static_cast<const holder*>(self);
+
+                switch (action) {
+                case Type:
+                    return const_cast<void*>(static_cast<const void*>(
+                        &boost::typeindex::type_id<ValueType>().type_info()
+                    ));
+
+                case Clone:
+                    return new holder(*held->value());
+
+                case Destroy:
+                    const_cast<ValueType*>(held->value())->~ValueType();
+                    break;
+                }
+
+                return 0;
             }
 
-            virtual placeholder * clone() const
-            {
-                return new holder(held);
+            inline ValueType* value() BOOST_NOEXCEPT {
+                return reinterpret_cast<ValueType*>(&held);
             }
 
-        public: // representation
+            inline const ValueType* value() const BOOST_NOEXCEPT {
+                return reinterpret_cast<const ValueType*>(&held);
+            }
 
-            ValueType held;
-
-        private: // intentionally left unimplemented
-            holder & operator=(const holder &);
+            typename boost::aligned_storage<
+                sizeof(ValueType),
+                boost::alignment_of<ValueType>::value
+            >::type held;
         };
-
-#ifndef BOOST_NO_MEMBER_TEMPLATE_FRIENDS
 
     private: // representation
 
@@ -211,14 +238,7 @@ namespace boost
         template<typename ValueType>
         friend ValueType * unsafe_any_cast(any *) BOOST_NOEXCEPT;
 
-#else
-
-    public: // representation (public so any_cast can be non-friend)
-
-#endif
-
         placeholder * content;
-
     };
  
     inline void swap(any & lhs, any & rhs) BOOST_NOEXCEPT
@@ -245,9 +265,7 @@ namespace boost
     ValueType * any_cast(any * operand) BOOST_NOEXCEPT
     {
         return operand && operand->type() == boost::typeindex::type_id<ValueType>()
-            ? boost::addressof(
-                static_cast<any::holder<BOOST_DEDUCED_TYPENAME remove_cv<ValueType>::type> *>(operand->content)->held
-              )
+            ? static_cast<any::holder<BOOST_DEDUCED_TYPENAME remove_cv<ValueType>::type> *>(operand->content)->value()
             : 0;
     }
 
@@ -260,10 +278,9 @@ namespace boost
     template<typename ValueType>
     ValueType any_cast(any & operand)
     {
-        typedef BOOST_DEDUCED_TYPENAME remove_reference<ValueType>::type nonref;
+        typedef typename remove_reference<ValueType>::type nonref;
 
-
-        nonref * result = any_cast<nonref>(boost::addressof(operand));
+        nonref * result = any_cast<nonref>(&operand);
         if(!result)
             boost::throw_exception(bad_any_cast());
 
@@ -316,9 +333,7 @@ namespace boost
     template<typename ValueType>
     inline ValueType * unsafe_any_cast(any * operand) BOOST_NOEXCEPT
     {
-        return boost::addressof(
-            static_cast<any::holder<ValueType> *>(operand->content)->held
-        );
+        return static_cast<any::holder<ValueType> *>(operand->content)->value();
     }
 
     template<typename ValueType>
