@@ -213,6 +213,7 @@ namespace boost
 
                 case Destroy:
                     const_cast<ValueType*>(held->value())->~ValueType();
+                    const_cast<holder*>(held)->~holder();
                     break;
                 }
 
