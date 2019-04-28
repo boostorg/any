@@ -46,7 +46,7 @@ namespace boost
         template<typename ValueType>
         any(const ValueType & value)
           : content(new holder<
-                BOOST_DEDUCED_TYPENAME remove_cv<BOOST_DEDUCED_TYPENAME decay<const ValueType>::type>::type
+                typename remove_cv<typename decay<const ValueType>::type>::type
             >(value))
         {
         }
@@ -150,7 +150,7 @@ namespace boost
 
         struct placeholder
         {
-            inline placeholder() BOOST_NOEXCEPT : control_function(&placeholder_control) {}
+            inline placeholder() BOOST_NOEXCEPT : control_function(0) {}
 
             static inline void destroy(placeholder* content) BOOST_NOEXCEPT
             {
@@ -175,24 +175,6 @@ namespace boost
         protected:
             BOOST_DEFAULTED_FUNCTION(~placeholder(), {})
 
-            static void* placeholder_control(const placeholder* self, actions_enum action) {
-                switch (action) {
-                case Type:
-                    return const_cast<void*>(static_cast<const void*>(
-                        &boost::typeindex::type_id<void>().type_info()
-                    ));
-
-                case Clone:
-                    return new placeholder();
-
-                case Destroy:
-                    delete const_cast<placeholder*>(self);
-                    break;
-                }
-
-                return 0;
-            }
-
             typedef void* (*control_function_t)(const placeholder*, actions_enum);
             control_function_t control_function;
         };
@@ -214,17 +196,20 @@ namespace boost
             }
 #endif
 
-            ~holder() BOOST_NOEXCEPT {
+            ~holder() BOOST_NOEXCEPT
+            {
                 value()->~ValueType();
             }
 
             // Function that replaces multiple virtual functions. In that way
             // no RTTI emited for each of the `holder` instantiations, binries
             // become smaller.
-            static void* control(const placeholder* self, actions_enum action) {
+            static void* control(const placeholder* self, actions_enum action)
+            {
                 const holder* held = static_cast<const holder*>(self);
 
-                switch (action) {
+                switch (action)
+                {
                 case Type:
                     return const_cast<void*>(static_cast<const void*>(
                         &boost::typeindex::type_id<ValueType>().type_info()
@@ -241,11 +226,13 @@ namespace boost
                 return 0;
             }
 
-            inline ValueType* value() BOOST_NOEXCEPT {
+            inline ValueType* value() BOOST_NOEXCEPT
+            {
                 return reinterpret_cast<ValueType*>(&held);
             }
 
-            inline const ValueType* value() const BOOST_NOEXCEPT {
+            inline const ValueType* value() const BOOST_NOEXCEPT
+            {
                 return reinterpret_cast<const ValueType*>(&held);
             }
 
@@ -290,7 +277,7 @@ namespace boost
     ValueType * any_cast(any * operand) BOOST_NOEXCEPT
     {
         return operand && operand->type() == boost::typeindex::type_id<ValueType>()
-            ? static_cast<any::holder<BOOST_DEDUCED_TYPENAME remove_cv<ValueType>::type> *>(operand->content)->value()
+            ? static_cast<any::holder<typename remove_cv<ValueType>::type> *>(operand->content)->value()
             : 0;
     }
 
@@ -313,10 +300,10 @@ namespace boost
         // `ValueType` is not a reference. Example:
         // `static_cast<std::string>(*result);` 
         // which is equal to `std::string(*result);`
-        typedef BOOST_DEDUCED_TYPENAME boost::conditional<
+        typedef typename boost::conditional<
             boost::is_reference<ValueType>::value,
             ValueType,
-            BOOST_DEDUCED_TYPENAME boost::add_reference<ValueType>::type
+            typename boost::add_reference<ValueType>::type
         >::type ref_type;
 
 #ifdef BOOST_MSVC
@@ -332,7 +319,7 @@ namespace boost
     template<typename ValueType>
     inline ValueType any_cast(const any & operand)
     {
-        typedef BOOST_DEDUCED_TYPENAME remove_reference<ValueType>::type nonref;
+        typedef typename remove_reference<ValueType>::type nonref;
         return any_cast<const nonref &>(const_cast<any &>(operand));
     }
 
