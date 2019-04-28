@@ -152,9 +152,10 @@ namespace boost
         {
             inline placeholder() BOOST_NOEXCEPT : control_function(&placeholder_control) {}
 
-            static void destroy(placeholder* content) BOOST_NOEXCEPT
+            static inline void destroy(placeholder* content) BOOST_NOEXCEPT
             {
-                content.control_function(content, Destroy);
+                control_function_t destructor = content->control_function;
+                destructor(content, Destroy);
             }
 
             inline const boost::typeindex::type_info& type() const BOOST_NOEXCEPT
