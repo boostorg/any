@@ -17,6 +17,14 @@ test-suite any :
     [ compile-fail any_cast_cv_failed.cpp ]
     [ compile-fail any_test_temporary_to_ref_failed.cpp ]
     [ compile-fail any_test_cv_to_rv_failed.cpp ]
+    [ run basic_any_test.cpp ]
+    [ run basic_any_test.cpp : : : <rtti>off <define>BOOST_NO_RTTI <define>BOOST_NO_TYPEID : any_test_no_rtti  ]
+    [ run basic_any_test_rv.cpp ]
+    [ run basic_any_test_rv.cpp : : : <rtti>off <define>BOOST_NO_RTTI <define>BOOST_NO_TYPEID : any_test_rv_no_rtti  ]
+    [ run basic_any_test_mplif.cpp ]
+    [ compile-fail basic_any_cast_cv_failed.cpp ]
+    [ compile-fail basic_any_test_temporary_to_ref_failed.cpp ]
+    [ compile-fail basic_any_test_cv_to_rv_failed.cpp ]
     ;
 
 
