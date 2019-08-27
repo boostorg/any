@@ -368,7 +368,7 @@ namespace any_tests // test definitions
             : ptr(p)
         {}
 
-	    const T** operator &() {
+        const T** operator &() {
             return &ptr;
         }
 
