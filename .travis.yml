@@ -100,7 +100,7 @@ before_install:
   - BOOST=$HOME/boost-local
   - git clone -b $BOOST_BRANCH --depth 10 https://github.com/boostorg/boost.git $BOOST
   - cd $BOOST
-  - git submodule update --init --depth 10 tools/build tools/boostdep tools/inspect
+  - git submodule update --init --depth 10 --jobs 2 tools/build tools/boostdep tools/inspect libs/filesystem
 
   # Replacing Boost module with this project and installing Boost dependencies
   - echo "Testing $BOOST/libs/$BOOST_LIBS_FOLDER moved from $TRAVIS_BUILD_DIR, branch $BOOST_BRANCH"
