@@ -51,7 +51,7 @@ namespace boost
             Copy,
             AnyCast,
             UnsafeCast,
-            Typeinfo,
+            Typeinfo
         };
 
         template <typename ValueType>
@@ -62,21 +62,23 @@ namespace boost
                 case Destroy:
                     reinterpret_cast<ValueType*>(&left.content.small_value)->~ValueType();
                     break;
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
                 case Move:
                     new (&left.content.small_value) ValueType(std::move(*reinterpret_cast<ValueType*>(&const_cast<basic_any*>(right)->content.small_value)));
                     left.man = right->man;
                     reinterpret_cast<ValueType const*>(&right->content.small_value)->~ValueType();
                     const_cast<basic_any*>(right)->man = 0;
                     break;
+#endif
                 case Copy:
                     new (&left.content.small_value) ValueType(*reinterpret_cast<const ValueType*>(&right->content.small_value));
                     left.man = right->man;
                     break;
                 case AnyCast:
                     return boost::typeindex::type_id<ValueType>() == *info ?
-                            reinterpret_cast<BOOST_DEDUCED_TYPENAME remove_cv<ValueType>::type *>(&left.content.small_value) : 0;
+                            reinterpret_cast<typename remove_cv<ValueType>::type *>(&left.content.small_value) : 0;
                 case UnsafeCast:
-                    return reinterpret_cast<BOOST_DEDUCED_TYPENAME remove_cv<ValueType>::type *>(&left.content.small_value);
+                    return reinterpret_cast<typename remove_cv<ValueType>::type *>(&left.content.small_value);
                 case Typeinfo:
                     return const_cast<void*>(static_cast<const void*>(&boost::typeindex::type_id<ValueType>().type_info()));
             }
@@ -104,9 +106,9 @@ namespace boost
                     break;
                 case AnyCast:
                     return boost::typeindex::type_id<ValueType>() == *info ?
-                            static_cast<BOOST_DEDUCED_TYPENAME remove_cv<ValueType>::type *>(left.content.large_value) : 0;
+                            static_cast<typename remove_cv<ValueType>::type *>(left.content.large_value) : 0;
                 case UnsafeCast:
-                    return reinterpret_cast<BOOST_DEDUCED_TYPENAME remove_cv<ValueType>::type *>(left.content.large_value);
+                    return reinterpret_cast<typename remove_cv<ValueType>::type *>(left.content.large_value);
                 case Typeinfo:
                     return const_cast<void*>(static_cast<const void*>(&boost::typeindex::type_id<ValueType>().type_info()));
             }
@@ -114,40 +116,39 @@ namespace boost
             return 0;
         }
 
-
         template <typename ValueType>
-        struct is_small_object_impl : boost::integral_constant<bool, sizeof(ValueType) <= OptimizeForSize &&
+        struct is_small_object : boost::integral_constant<bool, sizeof(ValueType) <= OptimizeForSize &&
             boost::alignment_of<ValueType>::value <= OptimizeForAlignment &&
             boost::is_nothrow_move_constructible<ValueType>::value>
         {};
 
         template <typename ValueType>
-        struct is_small_object : is_small_object_impl<ValueType>
-        {};
-
-        template <typename ValueType, typename DecayedType = BOOST_DEDUCED_TYPENAME boost::decay<const ValueType>::type>
         static void create(basic_any& any, const ValueType& value, boost::true_type)
         {
+            typedef typename boost::decay<const ValueType>::type DecayedType;
+
             any.man = &small_manager<DecayedType>;
             new (&any.content.small_value) ValueType(value);
         }
 
-        template <typename ValueType, typename DecayedType = BOOST_DEDUCED_TYPENAME boost::decay<const ValueType>::type>
+        template <typename ValueType>
         static void create(basic_any& any, const ValueType& value, boost::false_type)
         {
+            typedef typename boost::decay<const ValueType>::type DecayedType;
+
             any.man = &large_manager<DecayedType>;
             any.content.large_value = new DecayedType(value);
         }
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-        template <typename ValueType, typename DecayedType = BOOST_DEDUCED_TYPENAME boost::decay<const ValueType>::type>
+        template <typename ValueType, typename DecayedType = typename boost::decay<const ValueType>::type>
         static void create(basic_any& any, ValueType&& value, boost::true_type)
         {
             any.man = &small_manager<DecayedType>;
             new (&any.content.small_value) DecayedType(static_cast<ValueType&&>(value));
         }
 
-        template <typename ValueType, typename DecayedType = BOOST_DEDUCED_TYPENAME boost::decay<const ValueType>::type>
+        template <typename ValueType, typename DecayedType = typename boost::decay<const ValueType>::type>
         static void create(basic_any& any, ValueType&& value, boost::false_type)
         {
             any.man = &large_manager<DecayedType>;
@@ -160,12 +161,11 @@ namespace boost
 
         public: // structors
 
-        basic_any() BOOST_NOEXCEPT
+        BOOST_CONSTEXPR basic_any() BOOST_NOEXCEPT
             : man(0), content()
         {
         }
-template <typename T>
-struct print;
+
         template<typename ValueType>
         basic_any(const ValueType & value)
             : man(0), content()
@@ -199,7 +199,7 @@ struct print;
           : man(0), content()
         {
             content.large_value = 0;
-            create(*this, static_cast<ValueType&&>(value), is_small_object<BOOST_DEDUCED_TYPENAME boost::decay<ValueType>::type>());
+            create(*this, static_cast<ValueType&&>(value), is_small_object<typename boost::decay<ValueType>::type>());
         }
 #endif
 
@@ -294,14 +294,6 @@ struct print;
                     : boost::typeindex::type_id<void>().type_info();
         }
 
-#ifndef BOOST_NO_MEMBER_TEMPLATE_FRIENDS
-    private: // types
-#else
-    public: // types (public so any_cast can be non-friend)
-#endif
-
-#ifndef BOOST_NO_MEMBER_TEMPLATE_FRIENDS
-
     private: // representation
 
         template<typename ValueType, std::size_t Size, std::size_t Alignment>
@@ -310,18 +302,13 @@ struct print;
         template<typename ValueType, std::size_t Size, std::size_t Alignment>
         friend ValueType * unsafe_basic_any_cast(basic_any<Size, Alignment> *) BOOST_NOEXCEPT;
 
-#else
-
-    public: // representation (public so any_cast can be non-friend)
-
-#endif
         typedef void*(*manager)(operation op, basic_any& left, const basic_any* right, const boost::typeindex::type_info* info);
 
         manager man;
 
         union content {
             void * large_value;
-            BOOST_DEDUCED_TYPENAME boost::aligned_storage<OptimizeForSize, OptimizeForAlignment>::type small_value;
+            typename boost::aligned_storage<OptimizeForSize, OptimizeForAlignment>::type small_value;
         } content;
 
     };
@@ -351,7 +338,7 @@ struct print;
     ValueType * basic_any_cast(basic_any<Size, Alignment> * operand) BOOST_NOEXCEPT
     {
         return operand->man ?
-                static_cast<BOOST_DEDUCED_TYPENAME remove_cv<ValueType>::type *>(operand->man(basic_any<Size, Alignment>::AnyCast, *operand, 0, &boost::typeindex::type_id<ValueType>().type_info()))
+                static_cast<typename remove_cv<ValueType>::type *>(operand->man(basic_any<Size, Alignment>::AnyCast, *operand, 0, &boost::typeindex::type_id<ValueType>().type_info()))
                 : 0;
     }
 
@@ -364,8 +351,7 @@ struct print;
     template<typename ValueType, std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
     ValueType basic_any_cast(basic_any<OptimizeForSize, OptimizeForAlignment> & operand)
     {
-        typedef BOOST_DEDUCED_TYPENAME remove_reference<ValueType>::type nonref;
-
+        typedef typename remove_reference<ValueType>::type nonref;
 
         nonref * result = basic_any_cast<nonref>(boost::addressof(operand));
         if(!result)
@@ -375,10 +361,10 @@ struct print;
         // `ValueType` is not a reference. Example:
         // `static_cast<std::string>(*result);` 
         // which is equal to `std::string(*result);`
-        typedef BOOST_DEDUCED_TYPENAME boost::conditional<
+        typedef typename boost::conditional<
             boost::is_reference<ValueType>::value,
             ValueType,
-            BOOST_DEDUCED_TYPENAME boost::add_reference<ValueType>::type
+            typename boost::add_reference<ValueType>::type
         >::type ref_type;
 
 #ifdef BOOST_MSVC
@@ -394,7 +380,7 @@ struct print;
     template<typename ValueType, std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
     inline ValueType basic_any_cast(const basic_any<OptimizeForSize, OptimizeForAlignment> & operand)
     {
-        typedef BOOST_DEDUCED_TYPENAME remove_reference<ValueType>::type nonref;
+        typedef typename remove_reference<ValueType>::type nonref;
         return basic_any_cast<const nonref &>(const_cast<basic_any<OptimizeForSize, OptimizeForAlignment> &>(operand));
     }
 
@@ -432,6 +418,7 @@ struct print;
 
 // Copyright Kevlin Henney, 2000, 2001, 2002. All rights reserved.
 // Copyright Antony Polukhin, 2013-2019.
+// Copyright Ruslan Arutyunyan, 2019.
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
