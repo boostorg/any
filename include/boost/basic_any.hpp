@@ -141,16 +141,18 @@ namespace boost
         }
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-        template <typename ValueType, typename DecayedType = typename boost::decay<const ValueType>::type>
+        template <typename ValueType>
         static void create(basic_any& any, ValueType&& value, boost::true_type)
         {
+            typedef typename boost::decay<const ValueType>::type DecayedType;
             any.man = &small_manager<DecayedType>;
             new (&any.content.small_value) DecayedType(static_cast<ValueType&&>(value));
         }
 
-        template <typename ValueType, typename DecayedType = typename boost::decay<const ValueType>::type>
+        template <typename ValueType>
         static void create(basic_any& any, ValueType&& value, boost::false_type)
         {
+            typedef typename boost::decay<const ValueType>::type DecayedType;
             any.man = &large_manager<DecayedType>;
             any.content.large_value = new DecayedType(static_cast<ValueType&&>(value));
         }
