@@ -301,8 +301,8 @@ const typename any_test_type<Any>::test_case_iterator any_test_type<Any>::begin 
 
 template <typename Any>
 const typename any_test_type<Any>::test_case_iterator any_test_type<Any>::end =
-        any_test_type<Any>::test_cases + (sizeof any_test_type<Any>::test_cases 
-        / sizeof * any_test_type<Any>::test_cases);
+        any_test_type<Any>::test_cases + (sizeof(any_test_type<Any>::test_cases) 
+        / sizeof(*any_test_type<Any>::test_cases));
 
 template <typename Any>
 unsigned int any_test_type<Any>::move_copy_conting_class::moves_count = 0;
