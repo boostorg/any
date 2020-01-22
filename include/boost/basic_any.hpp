@@ -62,8 +62,8 @@ namespace boost
                 case Destroy:
                     reinterpret_cast<ValueType*>(&left.content.small_value)->~ValueType();
                     break;
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
                 case Move:
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
                     new (&left.content.small_value) ValueType(std::move(*reinterpret_cast<ValueType*>(&const_cast<basic_any*>(right)->content.small_value)));
                     left.man = right->man;
                     reinterpret_cast<ValueType const*>(&right->content.small_value)->~ValueType();
