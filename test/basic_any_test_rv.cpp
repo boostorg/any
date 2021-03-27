@@ -3,6 +3,7 @@
 //  See http://www.boost.org for most recent version, including documentation.
 //
 //  Copyright Antony Polukhin, 2013-2019.
+//  Copyright Ruslan Arutyunyan, 2019-2021.
 //
 //  Distributed under the Boost
 //  Software License, Version 1.0. (See accompanying file
@@ -15,19 +16,17 @@
 #include <boost/basic_any.hpp>
 #include "test.hpp"
 
-#define ANY_CAST_OP basic_any_cast // Must be defined before including move_test
-
 #include "move_test.hpp"
 #include <boost/move/move.hpp>
 
 #ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
 
-int main() 
+int main()
 {
     return EXIT_SUCCESS;
 }
 
-#else 
+#else
 
 int main()
 {

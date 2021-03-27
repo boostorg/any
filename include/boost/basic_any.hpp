@@ -253,7 +253,7 @@ namespace boost
             return *this;
         }
 
-#else 
+#else
         basic_any & operator=(const basic_any& rhs)
         {
             basic_any(rhs).swap(*this);
@@ -299,10 +299,10 @@ namespace boost
     private: // representation
 
         template<typename ValueType, std::size_t Size, std::size_t Alignment>
-        friend ValueType * basic_any_cast(basic_any<Size, Alignment> *) BOOST_NOEXCEPT;
+        friend ValueType * any_cast(basic_any<Size, Alignment> *) BOOST_NOEXCEPT;
 
         template<typename ValueType, std::size_t Size, std::size_t Alignment>
-        friend ValueType * unsafe_basic_any_cast(basic_any<Size, Alignment> *) BOOST_NOEXCEPT;
+        friend ValueType * unsafe_any_cast(basic_any<Size, Alignment> *) BOOST_NOEXCEPT;
 
         typedef void*(*manager)(operation op, basic_any& left, const basic_any* right, const boost::typeindex::type_info* info);
 
@@ -337,7 +337,7 @@ namespace boost
     };
 
     template<typename ValueType, std::size_t Size, std::size_t Alignment>
-    ValueType * basic_any_cast(basic_any<Size, Alignment> * operand) BOOST_NOEXCEPT
+    ValueType * any_cast(basic_any<Size, Alignment> * operand) BOOST_NOEXCEPT
     {
         return operand->man ?
                 static_cast<typename remove_cv<ValueType>::type *>(operand->man(basic_any<Size, Alignment>::AnyCast, *operand, 0, &boost::typeindex::type_id<ValueType>().type_info()))
@@ -345,17 +345,17 @@ namespace boost
     }
 
     template<typename ValueType, std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
-    inline const ValueType * basic_any_cast(const basic_any<OptimizeForSize, OptimizeForAlignment> * operand) BOOST_NOEXCEPT
+    inline const ValueType * any_cast(const basic_any<OptimizeForSize, OptimizeForAlignment> * operand) BOOST_NOEXCEPT
     {
-        return basic_any_cast<ValueType>(const_cast<basic_any<OptimizeForSize, OptimizeForAlignment> *>(operand));
+        return any_cast<ValueType>(const_cast<basic_any<OptimizeForSize, OptimizeForAlignment> *>(operand));
     }
 
     template<typename ValueType, std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
-    ValueType basic_any_cast(basic_any<OptimizeForSize, OptimizeForAlignment> & operand)
+    ValueType any_cast(basic_any<OptimizeForSize, OptimizeForAlignment> & operand)
     {
         typedef typename remove_reference<ValueType>::type nonref;
 
-        nonref * result = basic_any_cast<nonref>(boost::addressof(operand));
+        nonref * result = any_cast<nonref>(boost::addressof(operand));
         if(!result)
             boost::throw_exception(bad_any_cast());
 
@@ -380,22 +380,22 @@ namespace boost
     }
 
     template<typename ValueType, std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
-    inline ValueType basic_any_cast(const basic_any<OptimizeForSize, OptimizeForAlignment> & operand)
+    inline ValueType any_cast(const basic_any<OptimizeForSize, OptimizeForAlignment> & operand)
     {
         typedef typename remove_reference<ValueType>::type nonref;
-        return basic_any_cast<const nonref &>(const_cast<basic_any<OptimizeForSize, OptimizeForAlignment> &>(operand));
+        return any_cast<const nonref &>(const_cast<basic_any<OptimizeForSize, OptimizeForAlignment> &>(operand));
     }
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     template<typename ValueType, std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
-    inline ValueType basic_any_cast(basic_any<OptimizeForSize, OptimizeForAlignment>&& operand)
+    inline ValueType any_cast(basic_any<OptimizeForSize, OptimizeForAlignment>&& operand)
     {
         BOOST_STATIC_ASSERT_MSG(
             boost::is_rvalue_reference<ValueType&&>::value /*true if ValueType is rvalue or just a value*/
             || boost::is_const< typename boost::remove_reference<ValueType>::type >::value,
             "boost::any_cast shall not be used for getting nonconst references to temporary objects" 
         );
-        return basic_any_cast<ValueType>(operand);
+        return any_cast<ValueType>(operand);
     }
 #endif
 
@@ -406,21 +406,21 @@ namespace boost
     // use typeid() comparison, e.g., when our types may travel across
     // different shared libraries.
     template<typename ValueType, std::size_t OptimizedForSize, std::size_t OptimizeForAlignment>
-    inline ValueType * unsafe_basic_any_cast(basic_any<OptimizedForSize, OptimizeForAlignment> * operand) BOOST_NOEXCEPT
+    inline ValueType * unsafe_any_cast(basic_any<OptimizedForSize, OptimizeForAlignment> * operand) BOOST_NOEXCEPT
     {
         return static_cast<ValueType*>(operand->man(basic_any<OptimizedForSize, OptimizeForAlignment>::UnsafeCast, *operand, 0, 0));
     }
 
     template<typename ValueType, std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
-    inline const ValueType * unsafe_basic_any_cast(const basic_any<OptimizeForSize, OptimizeForAlignment> * operand) BOOST_NOEXCEPT
+    inline const ValueType * unsafe_any_cast(const basic_any<OptimizeForSize, OptimizeForAlignment> * operand) BOOST_NOEXCEPT
     {
-        return unsafe_basic_any_cast<ValueType>(const_cast<basic_any<OptimizeForSize, OptimizeForAlignment> *>(operand));
+        return unsafe_any_cast<ValueType>(const_cast<basic_any<OptimizeForSize, OptimizeForAlignment> *>(operand));
     }
 }
 
 // Copyright Kevlin Henney, 2000, 2001, 2002. All rights reserved.
 // Copyright Antony Polukhin, 2013-2019.
-// Copyright Ruslan Arutyunyan, 2019.
+// Copyright Ruslan Arutyunyan, 2019-2021/
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at

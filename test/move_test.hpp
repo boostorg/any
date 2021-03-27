@@ -17,10 +17,6 @@
 #include "test.hpp"
 #include <boost/move/move.hpp>
 
-#ifndef ANY_CAST_OP
-    #error "ANY_CAST_OP must be defined before this include"
-#endif
-
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 
 namespace any_tests {
@@ -41,12 +37,12 @@ struct any_test_type // test definitions
         check(value0.empty(), "moved away value is empty");
         check_false(value.empty(), "empty");
         check_equal(value.type(), boost::typeindex::type_id<move_copy_conting_class>(), "type");
-        check_non_null(boost::ANY_CAST_OP<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
+        check_non_null(boost::any_cast<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
         check_equal(
-            move_copy_conting_class::copy_count, 0u, 
+            move_copy_conting_class::copy_count, 0u,
             "checking copy counts");
         check_equal(
-            move_copy_conting_class::moves_count, 0u, 
+            move_copy_conting_class::moves_count, 0u,
             "checking move counts");
     }
 
@@ -54,38 +50,38 @@ struct any_test_type // test definitions
     {
         Any value0 = move_copy_conting_class();
         Any value = move_copy_conting_class();
-        move_copy_conting_class::copy_count = 0; 
+        move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
-        value = boost::move(value0); 
+        value = boost::move(value0);
 
         check(value0.empty(), "moved away is empty");
         check_false(value.empty(), "empty");
         check_equal(value.type(), boost::typeindex::type_id<move_copy_conting_class>(), "type");
-        check_non_null(boost::ANY_CAST_OP<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
+        check_non_null(boost::any_cast<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
         check_equal(
-            move_copy_conting_class::copy_count, 0u, 
+            move_copy_conting_class::copy_count, 0u,
             "checking copy counts");
         check_equal(
-            move_copy_conting_class::moves_count, 0u, 
+            move_copy_conting_class::moves_count, 0u,
             "checking move counts");
     }
 
     static void test_copy_construction()
     {
         Any value0 = move_copy_conting_class();
-        move_copy_conting_class::copy_count = 0; 
+        move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
         Any value(value0);
 
         check_false(value0.empty(), "copied value is not empty");
         check_false(value.empty(), "empty");
         check_equal(value.type(), boost::typeindex::type_id<move_copy_conting_class>(), "type");
-        check_non_null(boost::ANY_CAST_OP<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
+        check_non_null(boost::any_cast<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
         check_equal(
-            move_copy_conting_class::copy_count, 1u, 
+            move_copy_conting_class::copy_count, 1u,
             "checking copy counts");
         check_equal(
-            move_copy_conting_class::moves_count, 0u, 
+            move_copy_conting_class::moves_count, 0u,
             "checking move counts");
     }
 
@@ -93,26 +89,26 @@ struct any_test_type // test definitions
     {
         Any value0 = move_copy_conting_class();
         Any value = move_copy_conting_class();
-        move_copy_conting_class::copy_count = 0; 
+        move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
-        value = value0; 
+        value = value0;
 
         check_false(value0.empty(), "copied value is not empty");
         check_false(value.empty(), "empty");
         check_equal(value.type(), boost::typeindex::type_id<move_copy_conting_class>(), "type");
-        check_non_null(boost::ANY_CAST_OP<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
+        check_non_null(boost::any_cast<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
         check_equal(
-            move_copy_conting_class::copy_count, 1u, 
+            move_copy_conting_class::copy_count, 1u,
             "checking copy counts");
         check_equal(
-            move_copy_conting_class::moves_count, 0u, 
+            move_copy_conting_class::moves_count, 0u,
             "checking move counts");
     }
 
     static void test_move_construction_from_value()
     {
         move_copy_conting_class value0;
-        move_copy_conting_class::copy_count = 0; 
+        move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
 #ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
         Any value(boost::move(value0));
@@ -122,14 +118,14 @@ struct any_test_type // test definitions
 
         check_false(value.empty(), "empty");
         check_equal(value.type(), boost::typeindex::type_id<move_copy_conting_class>(), "type");
-        check_non_null(boost::ANY_CAST_OP<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
+        check_non_null(boost::any_cast<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
         
 #ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
         check_equal(
-            move_copy_conting_class::copy_count, 0u, 
+            move_copy_conting_class::copy_count, 0u,
             "checking copy counts");
         check_equal(
-            move_copy_conting_class::moves_count, 1u, 
+            move_copy_conting_class::moves_count, 1u,
             "checking move counts");
 #endif
 
@@ -139,24 +135,24 @@ struct any_test_type // test definitions
     {
         move_copy_conting_class value0;
         Any value;
-        move_copy_conting_class::copy_count = 0; 
+        move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
 #ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
-        value = boost::move(value0); 
+        value = boost::move(value0);
 #else
         value = value0;
-#endif 
+#endif
 
         check_false(value.empty(), "empty");
         check_equal(value.type(), boost::typeindex::type_id<move_copy_conting_class>(), "type");
-        check_non_null(boost::ANY_CAST_OP<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
+        check_non_null(boost::any_cast<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
 
 #ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
         check_equal(
-            move_copy_conting_class::copy_count, 0u, 
+            move_copy_conting_class::copy_count, 0u,
             "checking copy counts");
         check_equal(
-            move_copy_conting_class::moves_count, 1u, 
+            move_copy_conting_class::moves_count, 1u,
             "checking move counts");
 #endif
 
@@ -165,19 +161,19 @@ struct any_test_type // test definitions
     static void test_copy_construction_from_value()
     {
         move_copy_conting_class value0;
-        move_copy_conting_class::copy_count = 0; 
+        move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
         Any value(value0);
 
         check_false(value.empty(), "empty");
         check_equal(value.type(), boost::typeindex::type_id<move_copy_conting_class>(), "type");
-        check_non_null(boost::ANY_CAST_OP<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
+        check_non_null(boost::any_cast<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
 
         check_equal(
-            move_copy_conting_class::copy_count, 1u, 
+            move_copy_conting_class::copy_count, 1u,
             "checking copy counts");
         check_equal(
-            move_copy_conting_class::moves_count, 0u, 
+            move_copy_conting_class::moves_count, 0u,
             "checking move counts");
      }
 
@@ -185,19 +181,19 @@ struct any_test_type // test definitions
     {
         move_copy_conting_class value0;
         Any value;
-        move_copy_conting_class::copy_count = 0; 
+        move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
         value = value0;
 
         check_false(value.empty(), "empty");
         check_equal(value.type(), boost::typeindex::type_id<move_copy_conting_class>(), "type");
-        check_non_null(boost::ANY_CAST_OP<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
+        check_non_null(boost::any_cast<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
 
         check_equal(
-            move_copy_conting_class::copy_count, 1u, 
+            move_copy_conting_class::copy_count, 1u,
             "checking copy counts");
         check_equal(
-            move_copy_conting_class::moves_count, 0u, 
+            move_copy_conting_class::moves_count, 0u,
             "checking move counts");
     }
 
@@ -220,30 +216,30 @@ struct any_test_type // test definitions
         move_copy_conting_class value0;
         Any value;
         value = value0;
-        move_copy_conting_class::copy_count = 0; 
+        move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
 
-        move_copy_conting_class value1 = boost::ANY_CAST_OP<move_copy_conting_class&&>(value);
+        move_copy_conting_class value1 = boost::any_cast<move_copy_conting_class&&>(value);
 
         check_equal(
-            move_copy_conting_class::copy_count, 0u, 
+            move_copy_conting_class::copy_count, 0u,
             "checking copy counts");
         check_equal(
-            move_copy_conting_class::moves_count, 1u, 
+            move_copy_conting_class::moves_count, 1u,
             "checking move counts");
         (void)value1;
 // Following code shall fail to compile
         const Any cvalue = value0;
-        move_copy_conting_class::copy_count = 0; 
+        move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
 
-        move_copy_conting_class value2 = boost::ANY_CAST_OP<const move_copy_conting_class&>(cvalue);
+        move_copy_conting_class value2 = boost::any_cast<const move_copy_conting_class&>(cvalue);
 
         check_equal(
-            move_copy_conting_class::copy_count, 1u, 
+            move_copy_conting_class::copy_count, 1u,
             "checking copy counts");
         check_equal(
-            move_copy_conting_class::moves_count, 0u, 
+            move_copy_conting_class::moves_count, 0u,
             "checking move counts");
         (void)value2;
 //
@@ -301,7 +297,7 @@ const typename any_test_type<Any>::test_case_iterator any_test_type<Any>::begin 
 
 template <typename Any>
 const typename any_test_type<Any>::test_case_iterator any_test_type<Any>::end =
-        any_test_type<Any>::test_cases + (sizeof(any_test_type<Any>::test_cases) 
+        any_test_type<Any>::test_cases + (sizeof(any_test_type<Any>::test_cases)
         / sizeof(*any_test_type<Any>::test_cases));
 
 template <typename Any>

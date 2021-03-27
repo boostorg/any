@@ -2,38 +2,15 @@
 //
 //  See http://www.boost.org for most recent version, including documentation.
 //
-//  Copyright Antony Polukhin, 2013-2019.
 //  Copyright Ruslan Arutyunyan, 2019-2021.
 //
 //  Distributed under the Boost
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-#include <cstdlib>
-#include <string>
-#include <utility>
-
 #include <boost/basic_any.hpp>
-#include "test.hpp"
-#include <boost/move/move.hpp>
-
-#ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
 
 int main()
 {
-    BOOST_STATIC_ASSERT(false);
-    return EXIT_SUCCESS;
+    boost::basic_any<10, 5> a;
 }
-
-#else
-
-
-int main()
-{
-    int i = boost::any_cast<int&, 8, 8>(10);
-    (void)i;
-    return EXIT_SUCCESS;
-}
-
-#endif
-

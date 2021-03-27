@@ -15,19 +15,17 @@
 #include <boost/any.hpp>
 #include "test.hpp"
 
-#define ANY_CAST_OP any_cast // Must be defined before including move_test
-
 #include "move_test.hpp"
 #include <boost/move/move.hpp>
 
 #ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
 
-int main() 
+int main()
 {
     return EXIT_SUCCESS;
 }
 
-#else 
+#else
 
 int main()
 {

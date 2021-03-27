@@ -1,4 +1,5 @@
 // Copyright Antony Polukhin, 2017-2019.
+// Copyright Ruslan Arutyunyan, 2019-2021.
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -11,9 +12,9 @@
 
 int main() {
     boost::basic_any<> a = 1;
-    std::cout << boost::basic_any_cast<int>(a) << '\n';
+    std::cout << boost::any_cast<int>(a) << '\n';
     a = 3.14;
-    std::cout << boost::basic_any_cast<double>(a) << '\n';
+    std::cout << boost::any_cast<double>(a) << '\n';
     a = true;
-    std::cout << std::boolalpha << boost::basic_any_cast<bool>(a) << '\n';
+    std::cout << std::boolalpha << boost::any_cast<bool>(a) << '\n';
 }
