@@ -17,7 +17,7 @@
 #include <boost/type_index.hpp>
 
 
-namespace boost { 
+namespace boost {
 
 class BOOST_SYMBOL_VISIBLE bad_any_cast :
 #ifndef BOOST_NO_RTTI

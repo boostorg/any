@@ -2,12 +2,12 @@
 #define BOOST_BASIC_ANY_INCLUDED
 
 #include <boost/config.hpp>
-#if defined(_MSC_VER)
+#ifdef BOOST_HAS_PRAGMA_ONCE
 # pragma once
 #endif
 
-// Copyright Antony Polukhin, 2021.
 // Copyright Ruslan Arutyunyan, 2019-2021.
+// Copyright Antony Polukhin, 2021.
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -16,6 +16,7 @@
 // Contributed by Ruslan Arutyunyan
 
 #include <boost/anys/bad_any_cast.hpp>
+#include <boost/assert.hpp>
 #include <boost/aligned_storage.hpp>
 #include <boost/type_index.hpp>
 #include <boost/type_traits/remove_reference.hpp>
@@ -33,8 +34,10 @@
 #include <boost/type_traits/is_const.hpp>
 #include <boost/type_traits/conditional.hpp>
 
-namespace boost
-{
+namespace boost {
+
+namespace anys {
+
     template<std::size_t OptimizeForSize = sizeof(void*), std::size_t OptimizeForAlignment = boost::alignment_of<void*>::value>
     class basic_any
     {
@@ -61,15 +64,29 @@ namespace boost
                 case Destroy:
                     reinterpret_cast<ValueType*>(&left.content.small_value)->~ValueType();
                     break;
-                case Move:
+                case Move: {
+                    BOOST_ASSERT(left.empty());
+                    BOOST_ASSERT(right);
+                    BOOST_ASSERT(!right->empty());
+                    BOOST_ASSERT(right->type() == boost::typeindex::type_id<ValueType>());
+                    ValueType* value = reinterpret_cast<ValueType*>(&const_cast<basic_any*>(right)->content.small_value);
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-                    new (&left.content.small_value) ValueType(std::move(*reinterpret_cast<ValueType*>(&const_cast<basic_any*>(right)->content.small_value)));
+                    new (&left.content.small_value) ValueType(std::move(*value));
+#else
+                    new (&left.content.small_value) ValueType(*value);
+#endif
                     left.man = right->man;
                     reinterpret_cast<ValueType const*>(&right->content.small_value)->~ValueType();
                     const_cast<basic_any*>(right)->man = 0;
+
+                    };
                     break;
-#endif
+
                 case Copy:
+                    BOOST_ASSERT(left.empty());
+                    BOOST_ASSERT(right);
+                    BOOST_ASSERT(!right->empty());
+                    BOOST_ASSERT(right->type() == boost::typeindex::type_id<ValueType>());
                     new (&left.content.small_value) ValueType(*reinterpret_cast<const ValueType*>(&right->content.small_value));
                     left.man = right->man;
                     break;
@@ -94,12 +111,20 @@ namespace boost
                     delete static_cast<ValueType*>(left.content.large_value);
                     break;
                 case Move:
+                    BOOST_ASSERT(left.empty());
+                    BOOST_ASSERT(right);
+                    BOOST_ASSERT(!right->empty());
+                    BOOST_ASSERT(right->type() == boost::typeindex::type_id<ValueType>());
                     left.content.large_value = right->content.large_value;
                     left.man = right->man;
                     const_cast<basic_any*>(right)->content.large_value = 0;
                     const_cast<basic_any*>(right)->man = 0;
                     break;
                 case Copy:
+                    BOOST_ASSERT(left.empty());
+                    BOOST_ASSERT(right);
+                    BOOST_ASSERT(!right->empty());
+                    BOOST_ASSERT(right->type() == boost::typeindex::type_id<ValueType>());
                     left.content.large_value = new ValueType(*static_cast<const ValueType*>(right->content.large_value));
                     left.man = right->man;
                     break;
@@ -156,11 +181,11 @@ namespace boost
             any.content.large_value = new DecayedType(static_cast<ValueType&&>(value));
         }
 #endif
-        public: // non-type template parameters accessors
+    public: // non-type template parameters accessors
             static BOOST_CONSTEXPR_OR_CONST std::size_t buffer_size = OptimizeForSize;
             static BOOST_CONSTEXPR_OR_CONST std::size_t buffer_align = OptimizeForAlignment;
 
-        public: // structors
+    public: // structors
 
         BOOST_CONSTEXPR basic_any() BOOST_NOEXCEPT
             : man(0), content()
@@ -186,10 +211,12 @@ namespace boost
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
         // Move constructor
         basic_any(basic_any&& other) BOOST_NOEXCEPT
-          : man(other.man), content()
+          : man(0), content()
         {
-            man(Move, *this, &other, 0);
-            other.man = 0;
+            if (other.man)
+            {
+                other.man(Move, *this, &other, 0);
+            }
         }
 
         // Perfect forwarding of ValueType
@@ -199,7 +226,6 @@ namespace boost
             , typename boost::disable_if<boost::is_const<ValueType> >::type* = 0) // disable if value has type `const ValueType&&`
           : man(0), content()
         {
-            content.large_value = 0;
             create(*this, static_cast<ValueType&&>(value), is_small_object<typename boost::decay<ValueType>::type>());
         }
 #endif
@@ -216,23 +242,25 @@ namespace boost
 
         basic_any & swap(basic_any & rhs) BOOST_NOEXCEPT
         {
-            if (this != &rhs)
+            if (this == &rhs)
             {
-                if (man && rhs.man)
-                {
-                    basic_any tmp;
-                    rhs.man(Move, tmp, &rhs, 0);
-                    man(Move, rhs, this, 0);
-                    tmp.man(Move, *this, &tmp, 0);
-                }
-                else if (man)
-                {
-                    man(Move, rhs, this, 0);
-                }
-                else if (rhs.man)
-                {
-                    rhs.man(Move, *this, &rhs, 0);
-                }
+                return *this;
+            }
+
+            if (man && rhs.man)
+            {
+                basic_any tmp;
+                rhs.man(Move, tmp, &rhs, 0);
+                man(Move, rhs, this, 0);
+                tmp.man(Move, *this, &tmp, 0);
+            }
+            else if (man)
+            {
+                man(Move, rhs, this, 0);
+            }
+            else if (rhs.man)
+            {
+                rhs.man(Move, *this, &rhs, 0);
             }
             return *this;
         }
@@ -311,9 +339,8 @@ namespace boost
             void * large_value;
             typename boost::aligned_storage<OptimizeForSize, OptimizeForAlignment>::type small_value;
         } content;
-
     };
- 
+
     template<std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
     void swap(basic_any<OptimizeForSize, OptimizeForAlignment>& lhs, basic_any<OptimizeForSize, OptimizeForAlignment>& rhs) BOOST_NOEXCEPT
     {
@@ -343,9 +370,9 @@ namespace boost
         if(!result)
             boost::throw_exception(bad_any_cast());
 
-        // Attempt to avoid construction of a temporary object in cases when 
+        // Attempt to avoid construction of a temporary object in cases when
         // `ValueType` is not a reference. Example:
-        // `static_cast<std::string>(*result);` 
+        // `static_cast<std::string>(*result);`
         // which is equal to `std::string(*result);`
         typedef typename boost::conditional<
             boost::is_reference<ValueType>::value,
@@ -377,7 +404,7 @@ namespace boost
         BOOST_STATIC_ASSERT_MSG(
             boost::is_rvalue_reference<ValueType&&>::value /*true if ValueType is rvalue or just a value*/
             || boost::is_const< typename boost::remove_reference<ValueType>::type >::value,
-            "boost::any_cast shall not be used for getting nonconst references to temporary objects" 
+            "boost::any_cast shall not be used for getting nonconst references to temporary objects"
         );
         return any_cast<ValueType>(operand);
     }
@@ -400,6 +427,12 @@ namespace boost
     {
         return unsafe_any_cast<ValueType>(const_cast<basic_any<OptimizeForSize, OptimizeForAlignment> *>(operand));
     }
-}
+
+} // namespace anys
+
+using boost::anys::any_cast;
+using boost::anys::unsafe_any_cast;
+
+} // namespace boost
 
 #endif

@@ -1,14 +1,14 @@
 //  See http://www.boost.org for most recent version, including documentation.
 //
-//  Copyright Antony Polukhin, 2013-2019.
+//  Copyright Antony Polukhin, 2013-2021.
 //  Copyright Ruslan Arutyunyan, 2019.
 //
 //  Distributed under the Boost
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef MOVE_TEST_INCLUDED
-#define MOVE_TEST_INCLUDED
+#ifndef BOOST_ANY_TESTS_MOVE_TEST_HPP_INCLUDED
+#define BOOST_ANY_TESTS_MOVE_TEST_HPP_INCLUDED
 
 #include <cstdlib>
 #include <string>
@@ -16,21 +16,19 @@
 
 #include "test.hpp"
 #include <boost/move/move.hpp>
+#include <boost/type_index.hpp>
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 
 namespace any_tests {
 
 template <typename Any>
-struct any_test_type // test definitions
+struct move_tests // test definitions
 {
-    typedef test<const char *, void (*)()> test_case;
-    typedef const test_case * test_case_iterator;
-
     static void test_move_construction()
     {
         Any value0 = move_copy_conting_class();
-        move_copy_conting_class::copy_count = 0; 
+        move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
         Any value(boost::move(value0));
 
@@ -119,7 +117,7 @@ struct any_test_type // test definitions
         check_false(value.empty(), "empty");
         check_equal(value.type(), boost::typeindex::type_id<move_copy_conting_class>(), "type");
         check_non_null(boost::any_cast<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
-        
+
 #ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
         check_equal(
             move_copy_conting_class::copy_count, 0u,
@@ -245,11 +243,6 @@ struct any_test_type // test definitions
 //
     }
 
-    static const test_case test_cases[];
-
-    static const test_case_iterator begin;
-    static const test_case_iterator end;
-
     class move_copy_conting_class {
     public:
         static unsigned int moves_count;
@@ -274,40 +267,37 @@ struct any_test_type // test definitions
         }
     };
 
-}; // struct any_test_type
+    static int run_tests() {
+        typedef test<const char *, void (*)()> test_case;
+        const test_case test_cases[] =
+        {
+            { "move construction of any",             test_move_construction      },
+            { "move assignment of any",               test_move_assignment        },
+            { "copy construction of any",             test_copy_construction      },
+            { "copy assignment of any",               test_copy_assignment        },
+
+            { "move construction from value",         test_move_construction_from_value },
+            { "move assignment from value",           test_move_assignment_from_value  },
+            { "copy construction from value",         test_copy_construction_from_value },
+            { "copy assignment from value",           test_copy_assignment_from_value },
+            { "constructing from const any&&",        test_construction_from_const_any_rv },
+            { "casting to rvalue reference",          test_cast_to_rv }
+        };
+        typedef const test_case * test_case_iterator;
+
+        tester<test_case_iterator> test_suite(test_cases, test_cases + sizeof(test_cases) / sizeof(test_cases[0]));
+        return test_suite() ? EXIT_SUCCESS : EXIT_FAILURE;
+    }
+}; // struct move_tests
 
 template <typename Any>
-const typename any_test_type<Any>::test_case any_test_type<Any>::test_cases[] =
-{
-    { "move construction of any",             any_test_type<Any>::test_move_construction      },
-    { "move assignment of any",               any_test_type<Any>::test_move_assignment        },
-    { "copy construction of any",             any_test_type<Any>::test_copy_construction      },
-    { "copy assignment of any",               any_test_type<Any>::test_copy_assignment        },
-
-    { "move construction from value",         any_test_type<Any>::test_move_construction_from_value },
-    { "move assignment from value",           any_test_type<Any>::test_move_assignment_from_value  },
-    { "copy construction from value",         any_test_type<Any>::test_copy_construction_from_value },
-    { "copy assignment from value",           any_test_type<Any>::test_copy_assignment_from_value },
-    { "constructing from const any&&",        any_test_type<Any>::test_construction_from_const_any_rv },
-    { "casting to rvalue reference",          any_test_type<Any>::test_cast_to_rv }
-};
+unsigned int move_tests<Any>::move_copy_conting_class::moves_count = 0;
 
 template <typename Any>
-const typename any_test_type<Any>::test_case_iterator any_test_type<Any>::begin = any_test_type<Any>::test_cases;
-
-template <typename Any>
-const typename any_test_type<Any>::test_case_iterator any_test_type<Any>::end =
-        any_test_type<Any>::test_cases + (sizeof(any_test_type<Any>::test_cases)
-        / sizeof(*any_test_type<Any>::test_cases));
-
-template <typename Any>
-unsigned int any_test_type<Any>::move_copy_conting_class::moves_count = 0;
-
-template <typename Any>
-unsigned int any_test_type<Any>::move_copy_conting_class::copy_count = 0;
+unsigned int move_tests<Any>::move_copy_conting_class::copy_count = 0;
 
 } // namespace any_tests
 
-#endif // BOOST_NO_CXX11_RVALUE_REFERENCES
+#endif // BOOST_ANY_TESTS_MOVE_TEST_HPP_INCLUDED
 
 #endif // MOVE_TEST_INCLUDED

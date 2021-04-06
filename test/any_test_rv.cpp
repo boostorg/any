@@ -8,15 +8,9 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-#include <cstdlib>
-#include <string>
-#include <utility>
-
 #include <boost/any.hpp>
-#include "test.hpp"
 
 #include "move_test.hpp"
-#include <boost/move/move.hpp>
 
 #ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
 
@@ -27,13 +21,8 @@ int main()
 
 #else
 
-int main()
-{
-    using namespace any_tests;
-
-    typedef any_test_type<boost::any> test_type;
-    tester<test_type::test_case_iterator> test_suite(test_type::begin, test_type::end);
-    return test_suite() ? EXIT_SUCCESS : EXIT_FAILURE;
+int main() {
+    return any_tests::move_tests<boost::any>::run_tests();
 }
 
 #endif

@@ -1,10 +1,11 @@
 // Copyright Ruslan Arutyunyan, 2019-2021.
+// Copyright Antony Polukhin, 2021.
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include <boost/basic_any.hpp>
+#include <boost/anys/basic_any.hpp>
 
 #include <boost/core/lightweight_test.hpp>
 
@@ -46,10 +47,10 @@ struct A {
 int main() {
     {
         A a;
-        boost::basic_any<24, 8> any1(a);
+        boost::anys::basic_any<24, 8> any1(a);
         // to the same memory object
-        boost::basic_any<24, 8> any2(portable_move(any1));
-        boost::basic_any<24, 8> any3(portable_move(any2));
+        boost::anys::basic_any<24, 8> any2(portable_move(any1));
+        boost::anys::basic_any<24, 8> any3(portable_move(any2));
         BOOST_TEST_EQ(move_ctors_count, 0);
     }
 
@@ -63,10 +64,10 @@ int main() {
 
     {
         A a;
-        boost::basic_any<32, 8> any1(a);
+        boost::anys::basic_any<32, 8> any1(a);
         // to smaller object
-        boost::basic_any<16, 8> any2(portable_move(any1));
-        boost::basic_any<16, 8> any3(portable_move(any2));
+        boost::anys::basic_any<16, 8> any2(portable_move(any1));
+        boost::anys::basic_any<16, 8> any3(portable_move(any2));
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
         BOOST_TEST_EQ(move_ctors_count, 1);

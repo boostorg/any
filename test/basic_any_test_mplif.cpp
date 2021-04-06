@@ -1,4 +1,4 @@
-// Copyright Antony Polukhin, 2017-2019.
+// Copyright Antony Polukhin, 2017-2021.
 // Copyright Ruslan Arutyunyan, 2019-2021.
 //
 // Distributed under the Boost Software License, Version 1.0. (See
@@ -8,10 +8,10 @@
 // This tests the issue from https://svn.boost.org/trac/boost/ticket/12052
 
 #include <iostream>
-#include <boost/basic_any.hpp>
+#include <boost/anys/basic_any.hpp>
 
 int main() {
-    boost::basic_any<> a = 1;
+    boost::anys::basic_any<> a = 1;
     std::cout << boost::any_cast<int>(a) << '\n';
     a = 3.14;
     std::cout << boost::any_cast<double>(a) << '\n';

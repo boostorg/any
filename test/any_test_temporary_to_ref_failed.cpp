@@ -18,13 +18,13 @@
 
 #ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
 
-int main() 
+int main()
 {
     BOOST_STATIC_ASSERT(false);
     return EXIT_SUCCESS;
 }
 
-#else 
+#else
 
 
 int main()
