@@ -10,15 +10,15 @@
 #include "basic_test.hpp"
 
 int main() {
-    const int res1 = any_tests::any_basic_test_type<boost::anys::basic_any<> >::run_tests();
+    const int res1 = any_tests::basic_tests<boost::anys::basic_any<> >::run_tests();
     if (res1) return 1;
 
-    const int res2 = any_tests::any_basic_test_type<boost::anys::basic_any<256, 8> >::run_tests();
+    const int res2 = any_tests::basic_tests<boost::anys::basic_any<256, 8> >::run_tests();
     if (res2) return 2;
 
-    const int res3 = any_tests::any_basic_test_type<boost::anys::basic_any<1, 1> >::run_tests();
+    const int res3 = any_tests::basic_tests<boost::anys::basic_any<1, 1> >::run_tests();
     if (res3) return 3;
 
-    const int res4 = any_tests::any_basic_test_type<boost::anys::basic_any<64, 8> >::run_tests();
+    const int res4 = any_tests::basic_tests<boost::anys::basic_any<64, 8> >::run_tests();
     if (res4) return 4;
 }

@@ -13,7 +13,7 @@
 #include <string>
 #include <utility>
 
-#include <boost/basic_any.hpp>
+#include <boost/anys/basic_any.hpp>
 #include "test.hpp"
 #include <boost/move/move.hpp>
 
@@ -30,8 +30,8 @@ int main()
 
 int main()
 {
-    boost::basic_any<> const cvalue(10);
-    int i = boost::any_cast<int&&, 8, 8>(cvalue);
+    boost::anys::basic_any<> const cvalue(10);
+    int i = boost::any_cast<int&&>(cvalue);
     (void)i;
     return EXIT_SUCCESS;
 }
