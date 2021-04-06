@@ -2,49 +2,28 @@
 # subject to the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Copyright Antony Polukhin 2014-2019.
+# Copyright Antony Polukhin 2014-2021.
 
 #
 # See https://svn.boost.org/trac/boost/wiki/TravisCoverals for description of this file
 # and how it can be used with Boost libraries.
 #
-# File revision #9
+# File revision #10
 
-sudo: false
 language: cpp
 os: linux
-
-env:
-  global:
-    # Autodetect Boost branch by using the following code: - BOOST_BRANCH=$TRAVIS_BRANCH
-    # or just directly specify it
-    - BOOST_BRANCH=develop && [ "$TRAVIS_BRANCH" == "master" ] && BOOST_BRANCH=master || true
-
-    # Files, which coverage results must be ignored (files from other projects).
-    # Example: - IGNORE_COVERAGE='*/boost/progress.hpp */filesystem/src/*'
-    - IGNORE_COVERAGE=''
-
-    # boost-local/libs/ folder to put this library into. This may be useful, if you're for example running Travis
-    # from `Boost.DLL` repo while Boost already has `dll` and with to replace `dll` with content of`Boost.DLL`.
-    #
-    # Otherwise just leave the default value - BOOST_LIBS_FOLDER=$(basename $TRAVIS_BUILD_DIR)
-    - BOOST_LIBS_FOLDER=$(basename $TRAVIS_BUILD_DIR)
-
-    # Global options for sanitizers
-    - UBSAN_OPTIONS=print_stacktrace=1
-    - LSAN_OPTIONS=verbosity=1:log_threads=1
 
 # `--coverage` flags required to generate coverage info for Coveralls
 matrix:
   include:
-    - env: B2_ARGS='cxxstd=98,03,11,14,1y toolset=gcc-6 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD -fno-rtti" linkflags="--coverage -lasan -lubsan"'
+    - env: B2_ARGS='cxxstd=98,03,11,14,1y toolset=gcc-6 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD -fno-rtti" linkflags="--coverage -lasan -lubsan"' GCOVTOOL='gcov-6'
       name: "GCC-6, no RTTI"
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
           packages: g++-6
 
-    - env: B2_ARGS='cxxstd=98,03,11,14,1z toolset=gcc-8 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage  -lasan -lubsan"'
+    - env: B2_ARGS='cxxstd=98,03,11,14,1z toolset=gcc-8 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage  -lasan -lubsan"' GCOVTOOL='gcov-8'
       name: "GCC-8"
       sudo: required # Required by leak sanitizer
       addons:
@@ -52,7 +31,7 @@ matrix:
           sources: ubuntu-toolchain-r-test
           packages: g++-8
 
-    - env: B2_ARGS='cxxstd=98,0x toolset=gcc-4.6 cxxflags="--coverage -DBOOST_TRAVISCI_BUILD" linkflags="--coverage"'
+    - env: B2_ARGS='cxxstd=98,0x toolset=gcc-4.6 cxxflags="--coverage -DBOOST_TRAVISCI_BUILD" linkflags="--coverage"' GCOVTOOL='gcov-4.6'
       name: "GCC-4.6"
       addons:
         apt:
@@ -67,17 +46,18 @@ matrix:
 #          sources: ubuntu-toolchain-r-test
 #          packages: g++-8
 
-    - env: B2_ARGS='cxxstd=98,03,11,14,1z toolset=clang-5 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage -fsanitize=address,leak,undefined"'
-      name: "Clang-5"
+    - env: B2_ARGS='cxxstd=98,03,11,14,1z toolset=clang-8 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage -fsanitize=address,leak,undefined"' GCOVTOOL='gcov_for_clang.sh'
+      name: "Clang-8"
       sudo: required # Required by leak sanitizer
       addons:
         apt:
-          sources: llvm-toolchain-trusty-5.0
-          packages: clang-5.0
+          sources: llvm-toolchain-trusty-8
+          packages: clang-8
 
-    - env: B2_ARGS='cxxstd=03,11,14 toolset=clang-libc++ cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage -fsanitize=address,leak,undefined"'
+    # Sanitizers disabled for this toolset as they started causing link troubles: 
+    # hidden symbol `_ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE11__recommendEm' isn't defined
+    - env: B2_ARGS='cxxstd=03,11,14 toolset=clang-libc++ cxxflags="--coverage -DBOOST_TRAVISCI_BUILD" linkflags="--coverage"' GCOVTOOL='gcov_for_clang.sh'
       name: "Clang-3.8, libc++"
-      sudo: required # Required by leak sanitizer
       addons:
         apt:
           packages: libc++-dev
@@ -95,11 +75,29 @@ addons:
     - python-yaml
 
 before_install:
+  # Autodetect Boost branch by using the following code: - BOOST_BRANCH=$TRAVIS_BRANCH
+  # or just directly specify it
+  - BOOST_BRANCH=develop && [ "$TRAVIS_BRANCH" == "master" ] && BOOST_BRANCH=master || true
+
+  # Files, which coverage results must be ignored (files from other projects).
+  # Example: - IGNORE_COVERAGE='*/boost/progress.hpp */filesystem/src/*'
+  - IGNORE_COVERAGE=''
+
+  # boost-local/libs/ folder to put this library into. This may be useful, if you're for example running Travis
+  # from `Boost.DLL` repo while Boost already has `dll` and with to replace `dll` with content of`Boost.DLL`.
+  #
+  # Otherwise just leave the default value - BOOST_LIBS_FOLDER=$(basename $TRAVIS_BUILD_DIR)
+  - BOOST_LIBS_FOLDER=$(basename $TRAVIS_BUILD_DIR)
+
+  # Global options for sanitizers
+  - UBSAN_OPTIONS=print_stacktrace=1
+  - LSAN_OPTIONS=verbosity=1:log_threads=1
   # Cloning minimal set of Boost libraries
   - BOOST=$HOME/boost-local
   - git clone -b $BOOST_BRANCH --depth 10 https://github.com/boostorg/boost.git $BOOST
   - cd $BOOST
-  - git submodule update --init --depth 10 tools/build tools/boostdep
+  - git submodule update --init --depth 10 --jobs 2 tools/build tools/boostdep tools/inspect libs/filesystem
+  - python tools/boostdep/depinst/depinst.py --git_args "--depth 10 --jobs 2" $BOOST/libs/filesystem
 
   # Replacing Boost module with this project and installing Boost dependencies
   - echo "Testing $BOOST/libs/$BOOST_LIBS_FOLDER moved from $TRAVIS_BUILD_DIR, branch $BOOST_BRANCH"
@@ -111,6 +109,7 @@ before_install:
   # Adding missing toolsets and preparing Boost headers
   - ./bootstrap.sh
   - ./b2 headers
+  - ./b2 -j4 variant=debug tools/inspect/build
   - |-
     echo "using gcc ;" >> ~/user-config.jam
     echo "using clang ;" >> ~/user-config.jam
@@ -119,12 +118,13 @@ before_install:
     echo "using clang : 5 : clang++-5.0 ;" >> ~/user-config.jam
     echo "using clang : 6 : clang++-6.0 ;" >> ~/user-config.jam
     echo "using clang : 7 : clang++-7.0 ;" >> ~/user-config.jam
-    echo "using clang : 8 : clang++-8.0 ;" >> ~/user-config.jam
+    echo "using clang : 8 : clang++-8 ;" >> ~/user-config.jam
     echo "using clang : libc++ : clang++-libc++ ;" >> ~/user-config.jam
   - cd $BOOST/libs/$BOOST_LIBS_FOLDER/test/
 
 script:
   - sh -c "../../../b2 -j2 $B2_ARGS"
+  - ../../../dist/bin/inspect .. # inspect tool run
 
 after_success:
   # Copying Coveralls data to a separate folder
@@ -133,9 +133,12 @@ after_success:
   - find ../../../bin.v2/ -name "*.gcno" -exec cp "{}" $TRAVIS_BUILD_DIR/coverals/ \;
   - find ../../../bin.v2/ -name "*.da" -exec cp "{}" $TRAVIS_BUILD_DIR/coverals/ \;
   - find ../../../bin.v2/ -name "*.no" -exec cp "{}" $TRAVIS_BUILD_DIR/coverals/ \;
-  - wget https://github.com/linux-test-project/lcov/archive/v1.12.zip
-  - unzip v1.12.zip
-  - LCOV="`pwd`/lcov-1.12/bin/lcov --gcov-tool gcov-6"
+  - wget https://github.com/linux-test-project/lcov/archive/v1.14.zip
+  - unzip v1.14.zip
+  - LCOV="`pwd`/lcov-1.14/bin/lcov --gcov-tool $GCOVTOOL"
+  - mkdir -p ~/.local/bin
+  - echo -e '#!/bin/bash\nexec llvm-cov gcov "$@"' > ~/.local/bin/gcov_for_clang.sh
+  - chmod 755 ~/.local/bin/gcov_for_clang.sh
 
   # Preparing Coveralls data by changind data format to a readable one
   - echo "$LCOV --directory $TRAVIS_BUILD_DIR/coverals --base-directory `pwd` --capture --output-file $TRAVIS_BUILD_DIR/coverals/coverage.info"
