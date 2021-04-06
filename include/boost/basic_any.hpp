@@ -1,22 +1,21 @@
-// See http://www.boost.org/libs/any for Documentation.
-
 #ifndef BOOST_BASIC_ANY_INCLUDED
 #define BOOST_BASIC_ANY_INCLUDED
 
+#include <boost/config.hpp>
 #if defined(_MSC_VER)
 # pragma once
 #endif
 
-// what:  variant type boost::any
-// who:   contributed by Kevlin Henney,
-//        with features contributed and bugs found by
-//        Antony Polukhin, Ed Brey, Mark Rodgers, 
-//        Peter Dimov, and James Curran
-// when:  July 2001, April 2013 - 2019
+// Copyright Antony Polukhin, 2021.
+// Copyright Ruslan Arutyunyan, 2019-2021.
+//
+// Distributed under the Boost Software License, Version 1.0. (See
+// accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 
-#include <algorithm>
+// Contributed by Ruslan Arutyunyan
 
-#include <boost/config.hpp>
+#include <boost/anys/bad_any_cast.hpp>
 #include <boost/aligned_storage.hpp>
 #include <boost/type_index.hpp>
 #include <boost/type_traits/remove_reference.hpp>
@@ -316,25 +315,10 @@ namespace boost
     };
  
     template<std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
-    inline void swap(basic_any<OptimizeForSize, OptimizeForAlignment>& lhs, basic_any<OptimizeForSize, OptimizeForAlignment>& rhs) BOOST_NOEXCEPT
+    void swap(basic_any<OptimizeForSize, OptimizeForAlignment>& lhs, basic_any<OptimizeForSize, OptimizeForAlignment>& rhs) BOOST_NOEXCEPT
     {
         lhs.swap(rhs);
     }
-
-    class BOOST_SYMBOL_VISIBLE bad_any_cast :
-#ifndef BOOST_NO_RTTI
-        public std::bad_cast
-#else
-        public std::exception
-#endif
-    {
-    public:
-        virtual const char * what() const BOOST_NOEXCEPT_OR_NOTHROW
-        {
-            return "boost::bad_any_cast: "
-                   "failed conversion using boost::any_cast";
-        }
-    };
 
     template<typename ValueType, std::size_t Size, std::size_t Alignment>
     ValueType * any_cast(basic_any<Size, Alignment> * operand) BOOST_NOEXCEPT
@@ -417,13 +401,5 @@ namespace boost
         return unsafe_any_cast<ValueType>(const_cast<basic_any<OptimizeForSize, OptimizeForAlignment> *>(operand));
     }
 }
-
-// Copyright Kevlin Henney, 2000, 2001, 2002. All rights reserved.
-// Copyright Antony Polukhin, 2013-2019.
-// Copyright Ruslan Arutyunyan, 2019-2021/
-//
-// Distributed under the Boost Software License, Version 1.0. (See
-// accompanying file LICENSE_1_0.txt or copy at
-// http://www.boost.org/LICENSE_1_0.txt)
 
 #endif

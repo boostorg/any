@@ -6,36 +6,58 @@
 
 #include <boost/basic_any.hpp>
 
+#include <boost/core/lightweight_test.hpp>
+
 #include <cassert>
 #include <iostream>
 
-static bool test_flag = false;
-static int move_ctors_count{};
-static int destructors_count{};
+static int move_ctors_count = 0;
+static int destructors_count = 0;
 
 struct A {
     char a[32];
-    A() = default;
+
+    A() {}
     A(const A&) {}
+
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     A(A&&) noexcept {
         ++move_ctors_count;
     }
+#endif
+
     ~A() {
         ++destructors_count;
     }
 };
+
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+    template <class T>
+    T&& portable_move(T& value) {
+        return std::move(value);
+    }
+#else
+    template <class T>
+    T& portable_move(T& value) {
+        return value;
+    }
+#endif
 
 int main() {
     {
         A a;
         boost::basic_any<24, 8> any1(a);
         // to the same memory object
-        boost::basic_any<24, 8> any2(std::move(any1));
-        boost::basic_any<24, 8> any3(std::move(any2));
-        assert(move_ctors_count == 0);
+        boost::basic_any<24, 8> any2(portable_move(any1));
+        boost::basic_any<24, 8> any3(portable_move(any2));
+        BOOST_TEST_EQ(move_ctors_count, 0);
     }
 
-    assert(destructors_count == 2);
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+    BOOST_TEST_EQ(destructors_count, 2);
+#else
+    BOOST_TEST_EQ(destructors_count, 4);
+#endif
 
     destructors_count = 0;
 
@@ -43,10 +65,16 @@ int main() {
         A a;
         boost::basic_any<32, 8> any1(a);
         // to smaller object
-        boost::basic_any<16, 8> any2(std::move(any1));
-        boost::basic_any<16, 8> any3(std::move(any2));
-        assert(move_ctors_count == 1);
+        boost::basic_any<16, 8> any2(portable_move(any1));
+        boost::basic_any<16, 8> any3(portable_move(any2));
+
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+        BOOST_TEST_EQ(move_ctors_count, 1);
+#endif
     }
 
-    assert(destructors_count == 3);
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+    BOOST_TEST_EQ(destructors_count, 3);
+#endif
+    return boost::report_errors();
 }

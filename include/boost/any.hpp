@@ -3,6 +3,7 @@
 #ifndef BOOST_ANY_INCLUDED
 #define BOOST_ANY_INCLUDED
 
+#include <boost/config.hpp>
 #if defined(_MSC_VER)
 # pragma once
 #endif
@@ -14,7 +15,7 @@
 //        Peter Dimov, and James Curran
 // when:  July 2001, April 2013 - 2020
 
-#include <boost/config.hpp>
+#include <boost/anys/bad_any_cast.hpp>
 #include <boost/type_index.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/type_traits/decay.hpp>
@@ -229,21 +230,6 @@ namespace boost
     {
         lhs.swap(rhs);
     }
-
-    class BOOST_SYMBOL_VISIBLE bad_any_cast :
-#ifndef BOOST_NO_RTTI
-        public std::bad_cast
-#else
-        public std::exception
-#endif
-    {
-    public:
-        const char * what() const BOOST_NOEXCEPT_OR_NOTHROW BOOST_OVERRIDE
-        {
-            return "boost::bad_any_cast: "
-                   "failed conversion using boost::any_cast";
-        }
-    };
 
     template<typename ValueType>
     ValueType * any_cast(any * operand) BOOST_NOEXCEPT
