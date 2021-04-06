@@ -22,7 +22,7 @@ struct A {
     A(const A&) {}
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-    A(A&&) noexcept {
+    A(A&&) BOOST_NOEXCEPT {
         ++move_ctors_count;
     }
 #endif
