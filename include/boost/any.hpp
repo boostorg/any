@@ -4,7 +4,7 @@
 #define BOOST_ANY_INCLUDED
 
 #include <boost/config.hpp>
-#if defined(_MSC_VER)
+#ifdef BOOST_HAS_PRAGMA_ONCE
 # pragma once
 #endif
 
@@ -16,6 +16,7 @@
 // when:  July 2001, April 2013 - 2020
 
 #include <boost/anys/bad_any_cast.hpp>
+#include <boost/anys/fwd.hpp>
 #include <boost/type_index.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/type_traits/decay.hpp>
@@ -33,6 +34,18 @@
 
 namespace boost
 {
+
+    namespace anys { namespace detail {
+
+    template <class T>
+    struct is_basic_any: public false_type {};
+
+
+    template<std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
+    struct is_basic_any<boost::anys::basic_any<OptimizeForSize, OptimizeForAlignment> > : public true_type {};
+
+    }} // namespace anys::detail
+
     class any
     {
     public: // structors
@@ -48,6 +61,10 @@ namespace boost
                 BOOST_DEDUCED_TYPENAME remove_cv<BOOST_DEDUCED_TYPENAME decay<const ValueType>::type>::type
             >(value))
         {
+            BOOST_STATIC_ASSERT_MSG(
+                !anys::detail::is_basic_any<ValueType>::value,
+                "boost::any shall not be constructed from boost::anys::basic_any"
+            );
         }
 
         any(const any & other)
@@ -70,6 +87,10 @@ namespace boost
             , typename boost::disable_if<boost::is_const<ValueType> >::type* = 0) // disable if value has type `const ValueType&&`
           : content(new holder< typename decay<ValueType>::type >(static_cast<ValueType&&>(value)))
         {
+            BOOST_STATIC_ASSERT_MSG(
+                !anys::detail::is_basic_any<typename boost::decay<ValueType>::type>::value,
+                "boost::any shall not be constructed from boost::anys::basic_any"
+            );
         }
 #endif
 
@@ -93,6 +114,10 @@ namespace boost
         template<typename ValueType>
         any & operator=(const ValueType & rhs)
         {
+            BOOST_STATIC_ASSERT_MSG(
+                !anys::detail::is_basic_any<ValueType>::value,
+                "boost::anys::basic_any shall not be assigned into boost::any"
+            );
             any(rhs).swap(*this);
             return *this;
         }
@@ -122,6 +147,10 @@ namespace boost
         template <class ValueType>
         any & operator=(ValueType&& rhs)
         {
+            BOOST_STATIC_ASSERT_MSG(
+                !anys::detail::is_basic_any<typename boost::decay<ValueType>::type>::value,
+                "boost::anys::basic_any shall not be assigned into boost::any"
+            );
             any(static_cast<ValueType&&>(rhs)).swap(*this);
             return *this;
         }

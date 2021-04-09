@@ -1,11 +1,3 @@
-#ifndef BOOST_BASIC_ANY_INCLUDED
-#define BOOST_BASIC_ANY_INCLUDED
-
-#include <boost/config.hpp>
-#ifdef BOOST_HAS_PRAGMA_ONCE
-# pragma once
-#endif
-
 // Copyright Ruslan Arutyunyan, 2019-2021.
 // Copyright Antony Polukhin, 2021.
 //
@@ -15,7 +7,16 @@
 
 // Contributed by Ruslan Arutyunyan
 
+#ifndef BOOST_BASIC_ANY_INCLUDED
+#define BOOST_BASIC_ANY_INCLUDED
+
+#include <boost/config.hpp>
+#ifdef BOOST_HAS_PRAGMA_ONCE
+# pragma once
+#endif
+
 #include <boost/anys/bad_any_cast.hpp>
+#include <boost/anys/fwd.hpp>
 #include <boost/assert.hpp>
 #include <boost/aligned_storage.hpp>
 #include <boost/type_index.hpp>
@@ -38,7 +39,7 @@ namespace boost {
 
 namespace anys {
 
-    template<std::size_t OptimizeForSize = sizeof(void*), std::size_t OptimizeForAlignment = boost::alignment_of<void*>::value>
+    template<std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
     class basic_any
     {
         BOOST_STATIC_ASSERT_MSG(OptimizeForSize > 0 && OptimizeForAlignment > 0, "Size and Align shall be positive values");
@@ -196,6 +197,10 @@ namespace anys {
         basic_any(const ValueType & value)
             : man(0), content()
         {
+            BOOST_STATIC_ASSERT_MSG(
+                !(boost::is_same<ValueType, boost::any>::value),
+                "boost::anys::basic_any shall not be constructed from boost::any"
+            );
             create(*this, value, is_small_object<ValueType>());
         }
 
@@ -226,6 +231,10 @@ namespace anys {
             , typename boost::disable_if<boost::is_const<ValueType> >::type* = 0) // disable if value has type `const ValueType&&`
           : man(0), content()
         {
+            BOOST_STATIC_ASSERT_MSG(
+                !(boost::is_same<typename boost::decay<ValueType>::type, boost::any>::value),
+                "boost::anys::basic_any shall not be constructed from boost::any"
+            );
             create(*this, static_cast<ValueType&&>(value), is_small_object<typename boost::decay<ValueType>::type>());
         }
 #endif
@@ -270,6 +279,10 @@ namespace anys {
         template<typename ValueType>
         basic_any & operator=(const ValueType & rhs)
         {
+            BOOST_STATIC_ASSERT_MSG(
+                !(boost::is_same<ValueType, boost::any>::value),
+                "boost::any shall not be assigned into boost::anys::basic_any"
+            );
             basic_any(rhs).swap(*this);
             return *this;
         }
@@ -299,6 +312,10 @@ namespace anys {
         template <class ValueType>
         basic_any & operator=(ValueType&& rhs)
         {
+            BOOST_STATIC_ASSERT_MSG(
+                !(boost::is_same<typename boost::decay<ValueType>::type, boost::any>::value),
+                "boost::any shall not be assigned into boost::anys::basic_any"
+            );
             basic_any(static_cast<ValueType&&>(rhs)).swap(*this);
             return *this;
         }
