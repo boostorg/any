@@ -22,7 +22,7 @@ struct A {
     A(const A&) {}
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-    A(A&&) noexcept {
+    A(A&&) BOOST_NOEXCEPT {
         ++move_ctors_count;
     }
 #endif
@@ -50,10 +50,8 @@ int main() {
         A a;
         boost::anys::basic_any<24, 8> any1(a);
         boost::anys::basic_any<24, 8> any2(portable_move(any1));
-
-        // to wider object
-        boost::anys::basic_any<32, 8> any3(portable_move(any2));
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+        boost::anys::basic_any<24, 8> any3(portable_move(any2));
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES) && !defined(BOOST_NO_CXX11_NOEXCEPT)
         BOOST_TEST_EQ(move_ctors_count, 2);
 #else
         BOOST_TEST_EQ(move_ctors_count, 0);

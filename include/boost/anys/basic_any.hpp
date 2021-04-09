@@ -201,6 +201,10 @@ namespace anys {
                 !(boost::is_same<ValueType, boost::any>::value),
                 "boost::anys::basic_any shall not be constructed from boost::any"
             );
+            BOOST_STATIC_ASSERT_MSG(
+                !anys::detail::is_basic_any<ValueType>::value,
+                "boost::anys::basic_any<A, B> shall not be constructed from boost::anys::basic_any<C, D>"
+            );
             create(*this, value, is_small_object<ValueType>());
         }
 
@@ -231,11 +235,16 @@ namespace anys {
             , typename boost::disable_if<boost::is_const<ValueType> >::type* = 0) // disable if value has type `const ValueType&&`
           : man(0), content()
         {
+            typedef typename boost::decay<ValueType>::type DecayedType;
             BOOST_STATIC_ASSERT_MSG(
-                !(boost::is_same<typename boost::decay<ValueType>::type, boost::any>::value),
+                !(boost::is_same<DecayedType, boost::any>::value),
                 "boost::anys::basic_any shall not be constructed from boost::any"
             );
-            create(*this, static_cast<ValueType&&>(value), is_small_object<typename boost::decay<ValueType>::type>());
+            BOOST_STATIC_ASSERT_MSG(
+                !anys::detail::is_basic_any<DecayedType>::value,
+                "boost::anys::basic_any<A, B> shall not be constructed from boost::anys::basic_any<C, D>"
+            );
+            create(*this, static_cast<ValueType&&>(value), is_small_object<DecayedType>());
         }
 #endif
 
@@ -283,6 +292,10 @@ namespace anys {
                 !(boost::is_same<ValueType, boost::any>::value),
                 "boost::any shall not be assigned into boost::anys::basic_any"
             );
+            BOOST_STATIC_ASSERT_MSG(
+                !anys::detail::is_basic_any<ValueType>::value,
+                "boost::anys::basic_any<A, B> shall not be assigned into boost::anys::basic_any<C, D>"
+            );
             basic_any(rhs).swap(*this);
             return *this;
         }
@@ -312,9 +325,14 @@ namespace anys {
         template <class ValueType>
         basic_any & operator=(ValueType&& rhs)
         {
+            typedef typename boost::decay<ValueType>::type DecayedType;
             BOOST_STATIC_ASSERT_MSG(
-                !(boost::is_same<typename boost::decay<ValueType>::type, boost::any>::value),
+                !(boost::is_same<DecayedType, boost::any>::value),
                 "boost::any shall not be assigned into boost::anys::basic_any"
+            );
+            BOOST_STATIC_ASSERT_MSG(
+                (!anys::detail::is_basic_any<DecayedType>::value || boost::is_same<DecayedType, basic_any>::value),
+                "boost::anys::basic_any<A, B> shall not be assigned into boost::anys::basic_any<C, D>"
             );
             basic_any(static_cast<ValueType&&>(rhs)).swap(*this);
             return *this;

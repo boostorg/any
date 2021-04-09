@@ -48,34 +48,16 @@ int main() {
     {
         A a;
         boost::anys::basic_any<24, 8> any1(a);
-        // to the same memory object
         boost::anys::basic_any<24, 8> any2(portable_move(any1));
         boost::anys::basic_any<24, 8> any3(portable_move(any2));
         BOOST_TEST_EQ(move_ctors_count, 0);
     }
 
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES) && !defined(BOOST_NO_CXX11_NOEXCEPT)
     BOOST_TEST_EQ(destructors_count, 2);
 #else
     BOOST_TEST_EQ(destructors_count, 4);
 #endif
 
-    destructors_count = 0;
-
-    {
-        A a;
-        boost::anys::basic_any<32, 8> any1(a);
-        // to smaller object
-        boost::anys::basic_any<16, 8> any2(portable_move(any1));
-        boost::anys::basic_any<16, 8> any3(portable_move(any2));
-
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-        BOOST_TEST_EQ(move_ctors_count, 1);
-#endif
-    }
-
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-    BOOST_TEST_EQ(destructors_count, 3);
-#endif
     return boost::report_errors();
 }

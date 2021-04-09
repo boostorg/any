@@ -24,6 +24,15 @@ namespace anys {
 template<std::size_t OptimizeForSize = sizeof(void*), std::size_t OptimizeForAlignment = boost::alignment_of<void*>::value>
 class basic_any;
 
+namespace detail {
+    template <class T>
+    struct is_basic_any: public false_type {};
+
+
+    template<std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
+    struct is_basic_any<boost::anys::basic_any<OptimizeForSize, OptimizeForAlignment> > : public true_type {};
+} // namespace detail
+
 } // namespace anys
 
 } // namespace boost

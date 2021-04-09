@@ -34,18 +34,6 @@
 
 namespace boost
 {
-
-    namespace anys { namespace detail {
-
-    template <class T>
-    struct is_basic_any: public false_type {};
-
-
-    template<std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
-    struct is_basic_any<boost::anys::basic_any<OptimizeForSize, OptimizeForAlignment> > : public true_type {};
-
-    }} // namespace anys::detail
-
     class any
     {
     public: // structors

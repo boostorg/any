@@ -40,6 +40,11 @@ test-suite any :
     [ compile-fail any_to_basic_any_rv.cpp ]
     [ compile-fail basic_any_from_any_rv.cpp ]
     [ compile-fail basic_any_to_any_rv.cpp ]
+
+    [ compile-fail basic_any_from_basic_any.cpp ]
+    [ compile-fail basic_any_to_basic_any.cpp ]
+    [ compile-fail basic_any_from_basic_any_rv.cpp ]
+    [ compile-fail basic_any_to_basic_any_rv.cpp ]
   ;
 
 
