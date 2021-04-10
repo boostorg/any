@@ -58,6 +58,12 @@ int main() {
 #endif
     }
 
+#if defined(BOOST_NO_CXX11_NOEXCEPT) && !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
+    // The move constructor is not marked with noexcept, so the large_manager is used.
+    // Moving large_manager data is just swapping pointers without calling destructors.
+    BOOST_TEST_EQ(destructors_count, 2);
+#else
     BOOST_TEST_EQ(destructors_count, 4);
+#endif
     return boost::report_errors();
 }
