@@ -39,7 +39,7 @@ namespace boost {
 
 namespace anys {
 
-    template<std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
+    template <std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
     class basic_any
     {
         BOOST_STATIC_ASSERT_MSG(OptimizeForSize > 0 && OptimizeForAlignment > 0, "Size and Align shall be positive values");
@@ -63,6 +63,7 @@ namespace anys {
             switch (op)
             {
                 case Destroy:
+                    BOOST_ASSERT(!left.empty());
                     reinterpret_cast<ValueType*>(&left.content.small_value)->~ValueType();
                     break;
                 case Move: {
@@ -92,9 +93,12 @@ namespace anys {
                     left.man = right->man;
                     break;
                 case AnyCast:
+                    BOOST_ASSERT(info);
+                    BOOST_ASSERT(!left.empty());
                     return boost::typeindex::type_id<ValueType>() == *info ?
                             reinterpret_cast<typename remove_cv<ValueType>::type *>(&left.content.small_value) : 0;
                 case UnsafeCast:
+                    BOOST_ASSERT(!left.empty());
                     return reinterpret_cast<typename remove_cv<ValueType>::type *>(&left.content.small_value);
                 case Typeinfo:
                     return const_cast<void*>(static_cast<const void*>(&boost::typeindex::type_id<ValueType>().type_info()));
@@ -109,6 +113,7 @@ namespace anys {
             switch (op)
             {
                 case Destroy:
+                    BOOST_ASSERT(!left.empty());
                     delete static_cast<ValueType*>(left.content.large_value);
                     break;
                 case Move:
@@ -130,9 +135,12 @@ namespace anys {
                     left.man = right->man;
                     break;
                 case AnyCast:
+                    BOOST_ASSERT(info);
+                    BOOST_ASSERT(!left.empty());
                     return boost::typeindex::type_id<ValueType>() == *info ?
                             static_cast<typename remove_cv<ValueType>::type *>(left.content.large_value) : 0;
                 case UnsafeCast:
+                    BOOST_ASSERT(!left.empty());
                     return reinterpret_cast<typename remove_cv<ValueType>::type *>(left.content.large_value);
                 case Typeinfo:
                     return const_cast<void*>(static_cast<const void*>(&boost::typeindex::type_id<ValueType>().type_info()));

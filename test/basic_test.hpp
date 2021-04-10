@@ -30,21 +30,18 @@ struct huge_structure {
 
 
 template <typename Any>
-struct basic_tests {  // test definitions
+struct basic_tests  // test definitions
+{
     struct copy_counter
     {
-
     public:
-
         copy_counter() {}
         copy_counter(const copy_counter&) { ++count; }
         copy_counter& operator=(const copy_counter&) { ++count; return *this; }
         static int get_count() { return count; }
 
     private:
-
         static int count;
-
     };
 
     static void test_default_ctor()
@@ -277,17 +274,20 @@ struct basic_tests {  // test definitions
     }
 
     template<typename T>
-    class class_with_address_op {
+    class class_with_address_op
+    {
     public:
         class_with_address_op(const T* p)
             : ptr(p)
         {}
 
-	    const T** operator &() {
+        const T** operator &()
+        {
             return &ptr;
         }
 
-        const T* get() const {
+        const T* get() const
+        {
             return ptr;
         }
 
@@ -327,7 +327,8 @@ struct basic_tests {  // test definitions
         check_true(!!boost::any_cast<huge_structure>(&test_val), "any_cast");
     }
 
-    static int run_tests() {
+    static int run_tests()
+    {
         typedef test<const char *, void (*)()> test_case;
         const test_case test_cases[] =
         {
