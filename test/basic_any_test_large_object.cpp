@@ -53,7 +53,7 @@ int main() {
         BOOST_TEST_EQ(move_ctors_count, 0);
     }
 
-#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES) && !defined(BOOST_NO_CXX11_NOEXCEPT)
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
     BOOST_TEST_EQ(destructors_count, 2);
 #else
     BOOST_TEST_EQ(destructors_count, 4);
