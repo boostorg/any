@@ -10,7 +10,6 @@
 #include <boost/core/lightweight_test.hpp>
 
 #include <cassert>
-#include <iostream>
 
 static int move_ctors_count = 0;
 static int destructors_count = 0;
@@ -46,6 +45,7 @@ struct A {
 
 
 int main() {
+#if !defined(__GNUC__) || __GNUC__ > 4
     {
         A a;
         boost::anys::basic_any<24, 8> any1(a);
@@ -65,5 +65,7 @@ int main() {
 #else
     BOOST_TEST_EQ(destructors_count, 4);
 #endif
+
+#endif  // #if !defined(__GNUC__) || __GNUC__ > 4
     return boost::report_errors();
 }

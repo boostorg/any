@@ -10,7 +10,6 @@
 #include <boost/core/lightweight_test.hpp>
 
 #include <cassert>
-#include <iostream>
 
 static int move_ctors_count = 0;
 static int destructors_count = 0;

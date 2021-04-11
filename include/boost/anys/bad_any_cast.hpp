@@ -6,16 +6,19 @@
 
 // See http://www.boost.org/libs/any for Documentation.
 
-#ifndef BOOST_ANYS_UNIQUE_ANY_INCLUDED
-#define BOOST_ANYS_UNIQUE_ANY_INCLUDED
+#ifndef BOOST_ANYS_BAD_ANY_CAST_HPP_INCLUDED
+#define BOOST_ANYS_BAD_ANY_CAST_HPP_INCLUDED
 
 #include <boost/config.hpp>
 #ifdef BOOST_HAS_PRAGMA_ONCE
 #   pragma once
 #endif
 
-#include <boost/type_index.hpp>
+#ifndef BOOST_NO_RTTI
+#include <typeinfo>
+#endif
 
+#include <stdexcept>
 
 namespace boost {
 
@@ -37,4 +40,4 @@ public:
 } // namespace boost
 
 
-#endif // BOOST_ANYS_UNIQUE_ANY_INCLUDED
+#endif // #ifndef BOOST_ANYS_BAD_ANY_CAST_HPP_INCLUDED

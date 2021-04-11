@@ -7,8 +7,8 @@
 
 // Contributed by Ruslan Arutyunyan
 
-#ifndef BOOST_BASIC_ANY_INCLUDED
-#define BOOST_BASIC_ANY_INCLUDED
+#ifndef BOOST_ANYS_BASIC_ANY_HPP_INCLUDED
+#define BOOST_ANYS_BASIC_ANY_HPP_INCLUDED
 
 #include <boost/config.hpp>
 #ifdef BOOST_HAS_PRAGMA_ONCE
@@ -32,7 +32,6 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/core/addressof.hpp>
 #include <boost/type_traits/is_same.hpp>
-#include <boost/type_traits/is_const.hpp>
 #include <boost/type_traits/conditional.hpp>
 
 namespace boost {
@@ -478,4 +477,4 @@ using boost::anys::unsafe_any_cast;
 
 } // namespace boost
 
-#endif
+#endif // #ifndef BOOST_ANYS_BASIC_ANY_HPP_INCLUDED
