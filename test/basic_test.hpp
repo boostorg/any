@@ -164,11 +164,32 @@ struct basic_tests  // test definitions
             "comparing address in swapped against original");
         check_equal(swap_result, &original, "address of swap result");
 
+        swap(swapped, swapped);
+        check_false(swapped.empty(), "empty on self swap");
+        check_equal(
+            swapped.type(), boost::typeindex::type_id<huge_structure>(),
+            "type missmatch on self swap");
+        check_equal(
+            stored.text, boost::any_cast<huge_structure>(swapped).text,
+            "comparing against original text on self swap");
+
         Any copy1 = copy_counter();
         Any copy2 = copy_counter();
         int count = copy_counter::get_count();
         swap(copy1, copy2);
         check_equal(count, copy_counter::get_count(), "checking that free swap doesn't make any copies.");
+
+        Any any_char = '1';
+        swap(any_char, swapped);
+        check_equal(
+            stored.text, boost::any_cast<huge_structure>(any_char).text,
+            "comparing against original text on swap with small type");
+        check_equal(
+            swapped.type(), boost::typeindex::type_id<char>(),
+            "comparing type on swap with small type");
+        check_equal(
+            '1', boost::any_cast<char>(swapped),
+            "comparing small type swapped value");
     }
 
     static void test_null_copying()
