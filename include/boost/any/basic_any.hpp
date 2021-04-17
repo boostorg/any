@@ -15,8 +15,8 @@
 # pragma once
 #endif
 
-#include <boost/anys/bad_any_cast.hpp>
-#include <boost/anys/fwd.hpp>
+#include <boost/any/bad_any_cast.hpp>
+#include <boost/any/fwd.hpp>
 #include <boost/assert.hpp>
 #include <boost/aligned_storage.hpp>
 #include <boost/type_index.hpp>

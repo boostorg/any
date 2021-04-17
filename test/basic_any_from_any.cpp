@@ -4,7 +4,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/any.hpp>
-#include <boost/anys/basic_any.hpp>
+#include <boost/any/basic_any.hpp>
 
 int main()
 {

@@ -8,7 +8,7 @@
 // This tests the issue from https://svn.boost.org/trac/boost/ticket/12052
 
 #include <iostream>
-#include <boost/anys/basic_any.hpp>
+#include <boost/any/basic_any.hpp>
 
 int main() {
     boost::anys::basic_any<> a = 1;

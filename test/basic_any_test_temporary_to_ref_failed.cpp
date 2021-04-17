@@ -13,7 +13,7 @@
 #include <string>
 #include <utility>
 
-#include <boost/anys/basic_any.hpp>
+#include <boost/any/basic_any.hpp>
 #include "test.hpp"
 #include <boost/move/move.hpp>
 

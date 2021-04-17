@@ -563,7 +563,7 @@ public:
       </namespace>
     </header>
 
-    <header name="boost/anys/bad_any_cast.hpp">
+    <header name="boost/any/bad_any_cast.hpp">
       <namespace name="boost">
         <class name="bad_any_cast">
           <inherit access="public">
@@ -580,7 +580,7 @@ public:
       </namespace>
     </header>
 
-    <header name="boost/anys/basic_any.hpp">
+    <header name="boost/any/basic_any.hpp">
       <namespace name="boost"><namespace name="anys">
         <class name="basic_any">
           <purpose>A class with customizable Small Object Optimization whose instances can hold instances of any

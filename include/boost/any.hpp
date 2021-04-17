@@ -15,8 +15,8 @@
 //        Peter Dimov, and James Curran
 // when:  July 2001, April 2013 - 2020
 
-#include <boost/anys/bad_any_cast.hpp>
-#include <boost/anys/fwd.hpp>
+#include <boost/any/bad_any_cast.hpp>
+#include <boost/any/fwd.hpp>
 #include <boost/type_index.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/type_traits/decay.hpp>
