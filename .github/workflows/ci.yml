@@ -11,8 +11,6 @@ on:
       - fix/**
       - pr/**
 
-
-
 jobs:
   posix:
     strategy:
