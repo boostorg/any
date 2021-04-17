@@ -2,7 +2,8 @@
 //
 //  See http://www.boost.org for most recent version, including documentation.
 //
-//  Copyright Antony Polukhin, 2013-2021.
+//  Copyright Antony Polukhin, 2013-2019.
+//  Copyright Ruslan Arutyunyan, 2019-2021.
 //
 //  Distributed under the Boost
 //  Software License, Version 1.0. (See accompanying file
@@ -12,7 +13,7 @@
 #include <string>
 #include <utility>
 
-#include <boost/any.hpp>
+#include <boost/anys/basic_any.hpp>
 #include "test.hpp"
 #include <boost/move/move.hpp>
 
@@ -29,7 +30,7 @@ int main()
 
 int main()
 {
-    boost::any const cvalue(10);
+    boost::anys::basic_any<> const cvalue(10);
     int i = boost::any_cast<int&&>(cvalue);
     (void)i;
     return EXIT_SUCCESS;

@@ -2,28 +2,15 @@
 //
 //  See http://www.boost.org for most recent version, including documentation.
 //
-//  Copyright Antony Polukhin, 2013-2021.
+//  Copyright Ruslan Arutyunyan, 2019-2021.
 //
 //  Distributed under the Boost
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-#include <boost/any.hpp>
-
-#include "move_test.hpp"
-
-#ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
+#include <boost/anys/basic_any.hpp>
 
 int main()
 {
-    return EXIT_SUCCESS;
+    boost::anys::basic_any<1, 4> a;
 }
-
-#else
-
-int main() {
-    return any_tests::move_tests<boost::any>::run_tests();
-}
-
-#endif
-
