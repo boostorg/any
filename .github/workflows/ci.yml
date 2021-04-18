@@ -58,7 +58,7 @@ jobs:
             cxx: "g++"
             sources: ""
             llvm_os: ""
-            llvm_ver: ""
+            llvm_ver: "9"
             b2_args: "cxxstd=98,03,11,14,1z toolset=clang-libc++ cxxflags=\"--coverage -DBOOST_TRAVISCI_BUILD\" linkflags=\"--coverage\""
             gcovtool: "gcov_for_clang.sh"
 
@@ -200,7 +200,7 @@ jobs:
           unzip v1.14.zip
           LCOV="`pwd`/lcov-1.14/bin/lcov --gcov-tool $GCOVTOOL"
           mkdir -p ~/.local/bin
-          echo -e '#!/bin/bash\nexec llvm-cov gcov "$@"' > ~/.local/bin/gcov_for_clang.sh
+          echo -e "#!/bin/bash\nexec llvm-cov-${LLVM_VER} gcov \"\$@\"" > ~/.local/bin/gcov_for_clang.sh
           chmod 755 ~/.local/bin/gcov_for_clang.sh
           echo "$LCOV --directory $TRAVIS_BUILD_DIR/coverals --base-directory `pwd` --capture --output-file $TRAVIS_BUILD_DIR/coverals/coverage.info"
           $LCOV --directory $TRAVIS_BUILD_DIR/coverals --base-directory `pwd` --capture --output-file $TRAVIS_BUILD_DIR/coverals/coverage.info
