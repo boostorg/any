@@ -147,7 +147,6 @@ jobs:
           export VCS_COMMIT_ID=$GITHUB_SHA
           export GIT_COMMIT=$GITHUB_SHA
           export REPO_NAME=$(basename $GITHUB_REPOSITORY)
-          export USER=$(whoami)
           export CC=${CC:-gcc}
           export PATH=~/.local/bin:/usr/local/bin:$PATH
 
@@ -175,7 +174,7 @@ jobs:
           ./b2 -j4 variant=debug tools/inspect/build
           echo "using gcc ;" >> ~/user-config.jam
           echo "using clang ;" >> ~/user-config.jam
-          echo "using clang : ${LLVM_VER} : clang++-${LLVM_VER} ;" >> ~/user-config.jam
+          if [ -n "$LLVM_VER" ]; then echo "using clang : ${LLVM_VER} : clang++-${LLVM_VER} ;" >> ~/user-config.jam; fi
           echo "using clang : libc++ : clang++-libc++ ;" >> ~/user-config.jam
           cd $BOOST/libs/$BOOST_LIBS_FOLDER/test/
 
