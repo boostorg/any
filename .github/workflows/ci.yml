@@ -50,7 +50,7 @@ jobs:
             llvm_ver: ""
             b2_args: "cxxstd=98,0x toolset=gcc-4.6 cxxflags=\"--coverage -DBOOST_TRAVISCI_BUILD\" linkflags=\"--coverage\""
             gcovtool: "gcov-4.6"
-          - name: "Clang-10, libc++"
+          - name: "Clang-9, libc++"
             buildtype: "boost"
             packages: "libc++-dev"
             packages_to_remove: ""
@@ -59,7 +59,7 @@ jobs:
             sources: ""
             llvm_os: ""
             llvm_ver: ""
-            b2_args: "cxxstd=98,03,11,14,1z toolset=clang-libc++ cxxflags=\"--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD\" linkflags=\"--coverage -fsanitize=address,leak,undefined\""
+            b2_args: "cxxstd=98,03,11,14,1z toolset=clang-libc++ cxxflags=\"--coverage -DBOOST_TRAVISCI_BUILD\" linkflags=\"--coverage\""
             gcovtool: "gcov_for_clang.sh"
 
     runs-on: ${{ matrix.os }}
