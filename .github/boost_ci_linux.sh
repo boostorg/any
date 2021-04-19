@@ -183,8 +183,8 @@ ci_preprocess_coverage() {
       echo "--repo-name is not set"
       exit 1
   fi
-  if [ -z "$CI_GCOVTOOL" ]; then
-      echo "--gcov-tool is not set"
+  if [ -n "$CI_GCOVTOOL" ] && [ -n "$CI_LLVM_VER" ]; then
+      echo "Only --gcov-tool or --llvm-version must be set at the same time"
       exit 1
   fi
 
@@ -202,12 +202,15 @@ ci_preprocess_coverage() {
   find ../../../bin.v2/ -name "*.no" -exec cp "{}" $CI_PROJECT_DIR/coverals/ \;
   wget https://github.com/linux-test-project/lcov/archive/v1.14.zip
   unzip v1.14.zip
-  local LCOV="`pwd`/lcov-1.14/bin/lcov --gcov-tool $CI_GCOVTOOL"
-  mkdir -p ~/.local/bin
+
   if [ -n "$CI_LLVM_VER" ]; then
-      echo -e "#!/bin/bash\nexec llvm-cov-${CI_LLVM_VER} gcov \"\$@\"" > ~/.local/bin/gcov_for_clang.sh
+      echo -e "#!/bin/bash\nexec llvm-cov-${CI_LLVM_VER} gcov \"\$@\"" > lcov-1.14/bin/gcov_for_clang.sh
+      chmod 755 lcov-1.14/bin/gcov_for_clang.sh
+      local LCOV="`pwd`/lcov-1.14/bin/lcov --gcov-tool `pwd`/lcov-1.14/bin/gcov_for_clang.sh"
+  else
+      local LCOV="`pwd`/lcov-1.14/bin/lcov --gcov-tool $CI_GCOVTOOL"
   fi
-  chmod 755 ~/.local/bin/gcov_for_clang.sh
+
   echo "$LCOV --directory $CI_PROJECT_DIR/coverals --base-directory `pwd` --capture --output-file $CI_PROJECT_DIR/coverals/coverage.info"
   $LCOV --directory $CI_PROJECT_DIR/coverals --base-directory `pwd` --capture --output-file $CI_PROJECT_DIR/coverals/coverage.info
   cd $CI_BOOST_ROOT_DIR
