@@ -22,7 +22,7 @@ jobs:
             packages: "g++-6"
             packages_to_remove: ""
             os: "ubuntu-16.04"
-            llvm_os: ""
+            llvm_add_ppa: ""
             llvm_ver: ""
             b2_args: "cxxstd=98,03,11,14,1y toolset=gcc-6 cxxflags=\"--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD -fno-rtti\" linkflags=\"--coverage -lasan -lubsan\""
             gcovtool: "gcov-6"
@@ -31,7 +31,7 @@ jobs:
             packages: "g++-8"
             packages_to_remove: ""
             os: "ubuntu-16.04"
-            llvm_os: ""
+            llvm_add_ppa: ""
             llvm_ver: ""
             b2_args: "cxxstd=98,03,11,14,1z toolset=gcc-8 cxxflags=\"--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD\" linkflags=\"--coverage  -lasan -lubsan\""
             gcovtool: "gcov-8"
@@ -40,7 +40,7 @@ jobs:
             packages: "g++-4.6"
             packages_to_remove: ""
             os: "ubuntu-16.04"
-            llvm_os: ""
+            llvm_add_ppa: ""
             llvm_ver: ""
             b2_args: "cxxstd=98,0x toolset=gcc-4.6 cxxflags=\"--coverage -DBOOST_TRAVISCI_BUILD\" linkflags=\"--coverage\""
             gcovtool: "gcov-4.6"
@@ -49,7 +49,7 @@ jobs:
             packages: "libc++-dev"
             packages_to_remove: ""
             os: "ubuntu-18.04"
-            llvm_os: ""
+            llvm_add_ppa: ""
             llvm_ver: "9"
             b2_args: "cxxstd=98,03,11,14,1z toolset=clang-libc++ cxxflags=\"--coverage -DBOOST_TRAVISCI_BUILD\" linkflags=\"--coverage\""
             gcovtool: "gcov_for_clang.sh"
@@ -58,7 +58,7 @@ jobs:
             packages: "clang-3.8 llvm-3.8"
             packages_to_remove: ""
             os: "ubuntu-16.04"
-            llvm_os: ""
+            llvm_add_ppa: ""
             llvm_ver: "3.8"
             b2_args: "cxxstd=03,11,14 toolset=clang-3.8 cxxflags=\"--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD\" linkflags=\"--coverage -fsanitize=address,leak,undefined\""
             gcovtool: "gcov_for_clang.sh"
@@ -75,14 +75,14 @@ jobs:
       - name: Install packages
         shell: bash
         env:
-          CI_LLVM_OS: ${{ matrix.llvm_os }}
+          CI_LLVM_ADD_PPA: ${{ matrix.llvm_add_ppa }}
           CI_LLVM_VER: ${{ matrix.llvm_ver }}
           CI_PACKAGES: ${{ matrix.packages }}
           CI_PACKAGES_TO_REMOVE: ${{ matrix.packages_to_remove }}
         run: |
           source .github/boost_ci_linux.sh
           ci_remove_packages --packages="${CI_PACKAGES_TO_REMOVE}"
-          ci_install_packages --packages="${CI_PACKAGES}" --llvm-version=$CI_LLVM_VER --llvm-os=$CI_LLVM_OS
+          ci_install_packages --packages="${CI_PACKAGES}" --llvm-add-ppa=$CI_LLVM_ADD_PPA --llvm-version=$CI_LLVM_VER
 
       - name: Prepare Boost libraries
         shell: bash
@@ -91,10 +91,9 @@ jobs:
           CI_GIT_BRANCH: ${{ github.base_ref }}
         run: |
           CI_GIT_BRANCH=${CI_GIT_BRANCH:-$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')}
-          CI_REPO_NAME=$(basename $GITHUB_REPOSITORY)
 
           source .github/boost_ci_linux.sh
-          ci_prepare_boost_libraries
+          ci_prepare_boost_libraries --git-branch=$CI_GIT_BRANCH --repo-name=$(basename $GITHUB_REPOSITORY) --llvm-version=$CI_LLVM_VER
 
       - name: Run Tests
         shell: bash
@@ -121,11 +120,8 @@ jobs:
           CI_LLVM_VER: ${{ matrix.llvm_ver }}
           CI_GCOVTOOL: ${{ matrix.gcovtool }}
         run: |
-          CI_IGNORE_COVERAGE=${CI_IGNORE_COVERAGE:-''}
-          CI_REPO_NAME=$(basename $GITHUB_REPOSITORY)
-
           source .github/boost_ci_linux.sh
-          ci_preprocess_coverage
+          ci_preprocess_coverage --repo-name=$(basename $GITHUB_REPOSITORY) --llvm-version=$CI_LLVM_VER --ignore-coverage='' --gcov-tool=$CI_GCOVTOOL
 
       - name: Coveralls
         uses: coverallsapp/github-action@master

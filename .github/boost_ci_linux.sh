@@ -44,8 +44,66 @@ ci_install_packages() {
       --packages=*)
         local CI_PACKAGES="${1#*=}"
         ;;
-      --llvm-os=*)
-        local CI_LLVM_OS="${1#*=}"
+      --llvm-add-ppa=*)
+        local CI_LLVM_ADD_PPA="${1#*=}"
+        ;;
+      --llvm-version=*)
+        local CI_LLVM_VER="${1#*=}"
+        ;;
+      --ppa-sources=*)
+        local CI_PPA_SOURCES="${1#*=}"
+        ;;
+      *)
+        echo "Error: invalid argument $1"
+        exit 1
+    esac
+    shift
+  done
+
+  for i in {1..3}; do
+    sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test" && break || sleep 2
+  done
+
+  if test -n "${CI_LLVM_ADD_PPA}" ; then
+      wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+      local CI_LLVM_OS=$(lsb_release -cs)
+      if test -n "${CI_LLVM_VER}" ; then
+          sudo -E apt-add-repository "deb http://apt.llvm.org/${CI_LLVM_OS}/ llvm-toolchain-${CI_LLVM_OS}-${CI_LLVM_VER} main"
+      else
+          # Snapshot (i.e. trunk) build of clang
+          sudo -E apt-add-repository "deb http://apt.llvm.org/${CI_LLVM_OS}/ llvm-toolchain-${CI_LLVM_OS} main"
+      fi
+  fi
+  echo ">>>>> APT: UPDATE.."
+  sudo -E apt-get -o Acquire::Retries=3 update
+  if test -n "${CI_PPA_SOURCES}" ; then
+      echo ">>>>> APT: INSTALL SOURCES.."
+      for SOURCE in $CI_PPA_SOURCES; do
+          sudo -E apt-add-repository ppa:$SOURCE
+      done
+  fi
+  echo ">>>>> APT: INSTALL ${CI_PACKAGES}.."
+  sudo -E DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Retries=3 -y --no-install-suggests --no-install-recommends install ${CI_PACKAGES}
+  ci_print_packages_info "After package removal and install"
+}
+
+ci_prepare_boost_libraries() {
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --git-branch=*)
+        local CI_GIT_BRANCH="${1#*=}"
+        ;;
+      --repo-name=*)
+        local CI_REPO_NAME="${1#*=}"
+        ;;
+      --project-dir=*)
+        local CI_PROJECT_DIR="${1#*=}"
+        ;;
+      --in-libs-dir=*)
+        local CI_BOOST_IN_LIBS_DIR="${1#*=}"
+        ;;
+      --boost-root-dir=*)
+        local CI_BOOST_ROOT_DIR="${1#*=}"
         ;;
       --llvm-version=*)
         local CI_LLVM_VER="${1#*=}"
@@ -57,28 +115,18 @@ ci_install_packages() {
     shift
   done
 
-  echo "About to run linux-cxx-install.sh"
-  wget https://raw.githubusercontent.com/boostorg/boost-ci/master/ci/drone/linux-cxx-install.sh
-  chmod +x linux-cxx-install.sh
-  mv linux-cxx-install.sh .github/
-  PACKAGES=$CI_PACKAGES LLVM_OS=$CI_LLVM_OS LLVM_VER=$CI_LLVM_VER .github/linux-cxx-install.sh
-  echo "Done with linux-cxx-install.sh"
-  ci_print_packages_info "After package removal and install"
-}
-
-ci_prepare_boost_libraries() {
   if [ -z "$CI_GIT_BRANCH" ]; then
-      echo "CI_GIT_BRANCH variable is not set"
+      echo "--git-branch is not set"
       exit 1
   fi
   if [ -z "$CI_REPO_NAME" ]; then
-      echo "CI_REPO_NAME variable is not set"
+      echo "--repo-name is not set"
       exit 1
   fi
 
-  CI_PROJECT_DIR=${CI_PROJECT_DIR:-$(pwd)}
-  CI_BOOST_IN_LIBS_DIR=${CI_BOOST_IN_LIBS_DIR:-$(basename $CI_REPO_NAME)}
-  CI_BOOST_ROOT_DIR=${CI_BOOST_ROOT_DIR:-$HOME/boost-local}
+  local CI_PROJECT_DIR=${CI_PROJECT_DIR:-$(pwd)}
+  local CI_BOOST_IN_LIBS_DIR=${CI_BOOST_IN_LIBS_DIR:-$(basename $CI_REPO_NAME)}
+  local CI_BOOST_ROOT_DIR=${CI_BOOST_ROOT_DIR:-$HOME/boost-local}
 
   local BOOST_BRANCH=develop && [ "$CI_GIT_BRANCH" == "master" ] && BOOST_BRANCH=master || true
   git clone -b $BOOST_BRANCH --depth 10 https://github.com/boostorg/boost.git $CI_BOOST_ROOT_DIR
@@ -102,15 +150,48 @@ ci_prepare_boost_libraries() {
 }
 
 ci_preprocess_coverage() {
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --repo-name=*)
+        local CI_REPO_NAME="${1#*=}"
+        ;;
+      --project-dir=*)
+        local CI_PROJECT_DIR="${1#*=}"
+        ;;
+      --in-libs-dir=*)
+        local CI_BOOST_IN_LIBS_DIR="${1#*=}"
+        ;;
+      --boost-root-dir=*)
+        local CI_BOOST_ROOT_DIR="${1#*=}"
+        ;;
+      --llvm-version=*)
+        local CI_LLVM_VER="${1#*=}"
+        ;;
+      --ignore-coverage=*)
+        local CI_IGNORE_COVERAGE="${1#*=}"
+        ;;
+      --gcov-tool=*)
+        local CI_GCOVTOOL="${1#*=}"
+        ;;
+      *)
+        echo "Error: invalid argument $1"
+        exit 1
+    esac
+    shift
+  done
   if [ -z "$CI_REPO_NAME" ]; then
-      echo "CI_REPO_NAME variable is not set"
+      echo "--repo-name is not set"
+      exit 1
+  fi
+  if [ -z "$CI_GCOVTOOL" ]; then
+      echo "--gcov-tool is not set"
       exit 1
   fi
 
-  CI_IGNORE_COVERAGE=${CI_IGNORE_COVERAGE:-''}
-  CI_PROJECT_DIR=${CI_PROJECT_DIR:-$(pwd)}
-  CI_BOOST_IN_LIBS_DIR=${CI_BOOST_IN_LIBS_DIR:-$(basename $CI_REPO_NAME)}
-  CI_BOOST_ROOT_DIR=${CI_BOOST_ROOT_DIR:-$HOME/boost-local}
+  local CI_IGNORE_COVERAGE=${CI_IGNORE_COVERAGE:-''}
+  local CI_PROJECT_DIR=${CI_PROJECT_DIR:-$(pwd)}
+  local CI_BOOST_IN_LIBS_DIR=${CI_BOOST_IN_LIBS_DIR:-$(basename $CI_REPO_NAME)}
+  local CI_BOOST_ROOT_DIR=${CI_BOOST_ROOT_DIR:-$HOME/boost-local}
 
   mkdir -p $CI_PROJECT_DIR/coverals
 
@@ -123,7 +204,9 @@ ci_preprocess_coverage() {
   unzip v1.14.zip
   local LCOV="`pwd`/lcov-1.14/bin/lcov --gcov-tool $CI_GCOVTOOL"
   mkdir -p ~/.local/bin
-  echo -e "#!/bin/bash\nexec llvm-cov-${CI_LLVM_VER} gcov \"\$@\"" > ~/.local/bin/gcov_for_clang.sh
+  if [ -n "$CI_LLVM_VER" ]; then
+      echo -e "#!/bin/bash\nexec llvm-cov-${CI_LLVM_VER} gcov \"\$@\"" > ~/.local/bin/gcov_for_clang.sh
+  fi
   chmod 755 ~/.local/bin/gcov_for_clang.sh
   echo "$LCOV --directory $CI_PROJECT_DIR/coverals --base-directory `pwd` --capture --output-file $CI_PROJECT_DIR/coverals/coverage.info"
   $LCOV --directory $CI_PROJECT_DIR/coverals --base-directory `pwd` --capture --output-file $CI_PROJECT_DIR/coverals/coverage.info
