@@ -53,14 +53,14 @@ jobs:
             llvm_ver: "9"
             b2_args: "cxxstd=98,03,11,14,1z toolset=clang-libc++ cxxflags=\"--coverage -DBOOST_TRAVISCI_BUILD\" linkflags=\"--coverage\""
             gcovtool: "gcov_for_clang.sh"
-          - name: "Clang-3.8, libc++"
+          - name: "Clang-3.8"
             buildtype: "boost"
-            packages: "libc++-dev llvm-3.8"
+            packages: "llvm-3.8"
             packages_to_remove: ""
             os: "ubuntu-16.04"
             llvm_os: ""
             llvm_ver: "3.8"
-            b2_args: "cxxstd=03,11,14 toolset=clang-libc++ cxxflags=\"--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD\" linkflags=\"--coverage -fsanitize=address,leak,undefined\""
+            b2_args: "cxxstd=03,11,14 toolset=clang-3.8 cxxflags=\"--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD\" linkflags=\"--coverage -fsanitize=address,leak,undefined\""
             gcovtool: "gcov_for_clang.sh"
 
     runs-on: ${{ matrix.os }}
