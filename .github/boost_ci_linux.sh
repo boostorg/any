@@ -18,6 +18,19 @@ ci_print_packages_info() {
 }
 
 ci_remove_packages() {
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --packages=*)
+        local CI_PACKAGES_TO_REMOVE="${1#*=}"
+        ;;
+      *)
+        echo "Error: invalid argument $1"
+        exit 1
+    esac
+    shift
+  done
+
+
   ci_print_packages_info "Before package removal or install"
   if [ -n "$CI_PACKAGES_TO_REMOVE" ]; then
       echo "About to run sudo apt-get purge -y $CI_PACKAGES_TO_REMOVE"
@@ -26,6 +39,24 @@ ci_remove_packages() {
 }
 
 ci_install_packages() {
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --packages=*)
+        local CI_PACKAGES="${1#*=}"
+        ;;
+      --llvm-os=*)
+        local CI_LLVM_OS="${1#*=}"
+        ;;
+      --llvm-version=*)
+        local CI_LLVM_VER="${1#*=}"
+        ;;
+      *)
+        echo "Error: invalid argument $1"
+        exit 1
+    esac
+    shift
+  done
+
   echo "About to run linux-cxx-install.sh"
   wget https://raw.githubusercontent.com/boostorg/boost-ci/master/ci/drone/linux-cxx-install.sh
   chmod +x linux-cxx-install.sh

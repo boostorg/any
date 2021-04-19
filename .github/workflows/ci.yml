@@ -72,8 +72,8 @@ jobs:
           CI_PACKAGES_TO_REMOVE: ${{ matrix.packages_to_remove }}
         run: |
           source .github/boost_ci_linux.sh
-          ci_remove_packages
-          ci_install_packages
+          ci_remove_packages --packages="${CI_PACKAGES_TO_REMOVE}"
+          ci_install_packages --packages="${CI_PACKAGES}" --llvm-version=$CI_LLVM_VER --llvm-os=$CI_LLVM_OS
 
       - name: Prepare Boost libraries
         shell: bash
