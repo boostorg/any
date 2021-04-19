@@ -113,48 +113,75 @@ jobs:
         shell: bash
         env:
           CI_LLVM_VER: ${{ matrix.llvm_ver }}
-          CI_B2_ARGS: ${{ matrix.b2_args }}
-          CI_GCOVTOOL: ${{ matrix.gcovtool }}
           CI_GIT_BRANCH: ${{ github.base_ref }}
         run: |
           set -ex
 
-          export CI_PROJECT_DIR=$(pwd)
           export CI_GIT_BRANCH=${CI_GIT_BRANCH:-$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')}
           export CI_REPO_NAME=$(basename $GITHUB_REPOSITORY)
 
-          BOOST_BRANCH=develop && [ "$CI_GIT_BRANCH" == "master" ] && BOOST_BRANCH=master || true
-          IGNORE_COVERAGE=''
-          BOOST_LIBS_FOLDER=$(basename $CI_REPO_NAME)
+          ci_prepare_boost() {
+              CI_PROJECT_DIR=${CI_PROJECT_DIR:-$(pwd)}
+              CI_BOOST_IN_LIBS_DIR=${CI_BOOST_IN_LIBS_DIR:-$(basename $CI_REPO_NAME)}
+              CI_BOOST_ROOT_DIR=${CI_BOOST_ROOT_DIR:-$HOME/boost-local}
+
+              BOOST_BRANCH=develop && [ "$CI_GIT_BRANCH" == "master" ] && BOOST_BRANCH=master || true
+              git clone -b $BOOST_BRANCH --depth 10 https://github.com/boostorg/boost.git $CI_BOOST_ROOT_DIR
+              cd $CI_BOOST_ROOT_DIR
+              git submodule update --init --depth 10 --jobs 2 tools/build tools/boostdep tools/inspect libs/filesystem
+              python tools/boostdep/depinst/depinst.py --git_args "--depth 10 --jobs 2" $CI_BOOST_ROOT_DIR/libs/filesystem
+              echo "Testing $CI_BOOST_ROOT_DIR/libs/$CI_BOOST_IN_LIBS_DIR moved from $CI_PROJECT_DIR, branch $BOOST_BRANCH"
+              rm -rf $CI_BOOST_ROOT_DIR/libs/$CI_BOOST_IN_LIBS_DIR || true
+              cp -rp $CI_PROJECT_DIR $CI_BOOST_ROOT_DIR/libs/$CI_BOOST_IN_LIBS_DIR
+              python tools/boostdep/depinst/depinst.py --git_args "--depth 10 --jobs 2" $CI_BOOST_IN_LIBS_DIR
+              git status
+              ./bootstrap.sh
+              ./b2 headers
+              ./b2 -j4 variant=debug tools/inspect/build
+              echo "using gcc ;" >> ~/user-config.jam
+              echo "using clang ;" >> ~/user-config.jam
+              if [ -n "$CI_LLVM_VER" ]; then
+                  echo "using clang : ${CI_LLVM_VER} : clang++-${CI_LLVM_VER} ;" >> ~/user-config.jam;
+              fi
+              echo "using clang : libc++ : clang++-libc++ ;" >> ~/user-config.jam
+          }
+
+          ci_prepare_boost
+
+      - name: Run Tests
+        shell: bash
+        env:
+          CI_B2_ARGS: ${{ matrix.b2_args }}
+        run: |
+          set -ex
+
+          CI_BOOST_IN_LIBS_DIR=${CI_BOOST_IN_LIBS_DIR:-$(basename $CI_REPO_NAME)}
+          CI_BOOST_ROOT_DIR=${CI_BOOST_ROOT_DIR:-$HOME/boost-local}
+
           UBSAN_OPTIONS=print_stacktrace=1
           LSAN_OPTIONS=verbosity=1:log_threads=1
-          BOOST=$HOME/boost-local
-          git clone -b $BOOST_BRANCH --depth 10 https://github.com/boostorg/boost.git $BOOST
-          cd $BOOST
-          git submodule update --init --depth 10 --jobs 2 tools/build tools/boostdep tools/inspect libs/filesystem
-          python tools/boostdep/depinst/depinst.py --git_args "--depth 10 --jobs 2" $BOOST/libs/filesystem
-          echo "Testing $BOOST/libs/$BOOST_LIBS_FOLDER moved from $CI_PROJECT_DIR, branch $BOOST_BRANCH"
-          rm -rf $BOOST/libs/$BOOST_LIBS_FOLDER || true
-          cp -rp $CI_PROJECT_DIR $BOOST/libs/$BOOST_LIBS_FOLDER
-          python tools/boostdep/depinst/depinst.py --git_args "--depth 10 --jobs 2" $BOOST_LIBS_FOLDER
-          git status
-          ./bootstrap.sh
-          ./b2 headers
-          ./b2 -j4 variant=debug tools/inspect/build
-          echo "using gcc ;" >> ~/user-config.jam
-          echo "using clang ;" >> ~/user-config.jam
-          if [ -n "$CI_LLVM_VER" ]; then echo "using clang : ${CI_LLVM_VER} : clang++-${CI_LLVM_VER} ;" >> ~/user-config.jam; fi
-          echo "using clang : libc++ : clang++-libc++ ;" >> ~/user-config.jam
-          cd $BOOST/libs/$BOOST_LIBS_FOLDER/test/
 
-          echo '==================================> TEST'
-
+          cd $CI_BOOST_ROOT_DIR/libs/$CI_BOOST_IN_LIBS_DIR/test/
           sh -c "../../../b2 -j2 $CI_B2_ARGS"
           ../../../dist/bin/inspect ..
 
-          echo '==================================> AFTER_SUCCESS'
+      - name: Preprocess Coverage
+        shell: bash
+        env:
+          CI_LLVM_VER: ${{ matrix.llvm_ver }}
+          CI_GCOVTOOL: ${{ matrix.gcovtool }}
+        run: |
+          set -ex
+
+          pwd
+          IGNORE_COVERAGE=''
+          CI_PROJECT_DIR=${CI_PROJECT_DIR:-$(pwd)}
+          CI_BOOST_IN_LIBS_DIR=${CI_BOOST_IN_LIBS_DIR:-$(basename $CI_REPO_NAME)}
+          CI_BOOST_ROOT_DIR=${CI_BOOST_ROOT_DIR:-$HOME/boost-local}
 
           mkdir -p $CI_PROJECT_DIR/coverals
+
+          cd $CI_BOOST_ROOT_DIR/libs/$CI_BOOST_IN_LIBS_DIR/test/
           find ../../../bin.v2/ -name "*.gcda" -exec cp "{}" $CI_PROJECT_DIR/coverals/ \;
           find ../../../bin.v2/ -name "*.gcno" -exec cp "{}" $CI_PROJECT_DIR/coverals/ \;
           find ../../../bin.v2/ -name "*.da" -exec cp "{}" $CI_PROJECT_DIR/coverals/ \;
@@ -167,9 +194,9 @@ jobs:
           chmod 755 ~/.local/bin/gcov_for_clang.sh
           echo "$LCOV --directory $CI_PROJECT_DIR/coverals --base-directory `pwd` --capture --output-file $CI_PROJECT_DIR/coverals/coverage.info"
           $LCOV --directory $CI_PROJECT_DIR/coverals --base-directory `pwd` --capture --output-file $CI_PROJECT_DIR/coverals/coverage.info
-          cd $BOOST
-          $LCOV --remove $CI_PROJECT_DIR/coverals/coverage.info "/usr*" "*/$BOOST_LIBS_FOLDER/test/*" $IGNORE_COVERAGE "*/$BOOST_LIBS_FOLDER/tests/*" "*/$BOOST_LIBS_FOLDER/examples/*" "*/$BOOST_LIBS_FOLDER/example/*" -o $CI_PROJECT_DIR/coverals/coverage.info
-          OTHER_LIBS=`grep "submodule .*" .gitmodules | sed 's/\[submodule\ "\(.*\)"\]/"\*\/boost\/\1\.hpp" "\*\/boost\/\1\/\*"/g'| sed "/\"\*\/boost\/$BOOST_LIBS_FOLDER\/\*\"/d" | sed ':a;N;$!ba;s/\n/ /g'`
+          cd $CI_BOOST_ROOT_DIR
+          $LCOV --remove $CI_PROJECT_DIR/coverals/coverage.info "/usr*" "*/$CI_BOOST_IN_LIBS_DIR/test/*" $IGNORE_COVERAGE "*/$CI_BOOST_IN_LIBS_DIR/tests/*" "*/$CI_BOOST_IN_LIBS_DIR/examples/*" "*/$CI_BOOST_IN_LIBS_DIR/example/*" -o $CI_PROJECT_DIR/coverals/coverage.info
+          OTHER_LIBS=`grep "submodule .*" .gitmodules | sed 's/\[submodule\ "\(.*\)"\]/"\*\/boost\/\1\.hpp" "\*\/boost\/\1\/\*"/g'| sed "/\"\*\/boost\/$CI_BOOST_IN_LIBS_DIR\/\*\"/d" | sed ':a;N;$!ba;s/\n/ /g'`
           echo $OTHER_LIBS
           eval "$LCOV --remove $CI_PROJECT_DIR/coverals/coverage.info $OTHER_LIBS -o $CI_PROJECT_DIR/coverals/coverage.info"
 
