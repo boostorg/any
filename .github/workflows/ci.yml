@@ -89,25 +89,25 @@ jobs:
           }
 
           ci_remove_packages() {
+              ci_print_packages_info "Before package removal or install"
               if [ -n "$CI_PACKAGES_TO_REMOVE" ]; then
                   echo "About to run sudo apt-get purge -y $CI_PACKAGES_TO_REMOVE"
                   sudo apt-get purge -y $CI_PACKAGES_TO_REMOVE
               fi
           }
 
-          ci_linux_cxx_install() {
+          ci_install_packages() {
               echo "About to run linux-cxx-install.sh"
               wget https://raw.githubusercontent.com/boostorg/boost-ci/master/ci/drone/linux-cxx-install.sh
               chmod +x linux-cxx-install.sh
               mv linux-cxx-install.sh .github/
               PACKAGES=$CI_PACKAGES LLVM_OS=$CI_LLVM_OS LLVM_VER=$CI_LLVM_VER .github/linux-cxx-install.sh
               echo "Done with linux-cxx-install.sh"
+              ci_print_packages_info "After package removal and install"
           }
 
-          ci_print_packages_info "Before package removal or install"
           ci_remove_packages
-          ci_linux_cxx_install
-          ci_print_packages_info "After package removal and install"
+          ci_install_packages
 
       - name: Prepare Boost libraries and Test
         shell: bash
@@ -117,15 +117,15 @@ jobs:
         run: |
           set -ex
 
-          export CI_GIT_BRANCH=${CI_GIT_BRANCH:-$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')}
-          export CI_REPO_NAME=$(basename $GITHUB_REPOSITORY)
+          CI_GIT_BRANCH=${CI_GIT_BRANCH:-$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')}
+          CI_REPO_NAME=$(basename $GITHUB_REPOSITORY)
 
           ci_prepare_boost() {
               CI_PROJECT_DIR=${CI_PROJECT_DIR:-$(pwd)}
               CI_BOOST_IN_LIBS_DIR=${CI_BOOST_IN_LIBS_DIR:-$(basename $CI_REPO_NAME)}
               CI_BOOST_ROOT_DIR=${CI_BOOST_ROOT_DIR:-$HOME/boost-local}
 
-              BOOST_BRANCH=develop && [ "$CI_GIT_BRANCH" == "master" ] && BOOST_BRANCH=master || true
+              local BOOST_BRANCH=develop && [ "$CI_GIT_BRANCH" == "master" ] && BOOST_BRANCH=master || true
               git clone -b $BOOST_BRANCH --depth 10 https://github.com/boostorg/boost.git $CI_BOOST_ROOT_DIR
               cd $CI_BOOST_ROOT_DIR
               git submodule update --init --depth 10 --jobs 2 tools/build tools/boostdep tools/inspect libs/filesystem
@@ -174,31 +174,36 @@ jobs:
           set -ex
 
           pwd
-          IGNORE_COVERAGE=''
-          CI_PROJECT_DIR=${CI_PROJECT_DIR:-$(pwd)}
-          CI_BOOST_IN_LIBS_DIR=${CI_BOOST_IN_LIBS_DIR:-$(basename $CI_REPO_NAME)}
-          CI_BOOST_ROOT_DIR=${CI_BOOST_ROOT_DIR:-$HOME/boost-local}
 
-          mkdir -p $CI_PROJECT_DIR/coverals
+          ci_preprocess_coverage() {
+              CI_IGNORE_COVERAGE=${CI_IGNORE_COVERAGE:-''|
+              CI_PROJECT_DIR=${CI_PROJECT_DIR:-$(pwd)}
+              CI_BOOST_IN_LIBS_DIR=${CI_BOOST_IN_LIBS_DIR:-$(basename $CI_REPO_NAME)}
+              CI_BOOST_ROOT_DIR=${CI_BOOST_ROOT_DIR:-$HOME/boost-local}
 
-          cd $CI_BOOST_ROOT_DIR/libs/$CI_BOOST_IN_LIBS_DIR/test/
-          find ../../../bin.v2/ -name "*.gcda" -exec cp "{}" $CI_PROJECT_DIR/coverals/ \;
-          find ../../../bin.v2/ -name "*.gcno" -exec cp "{}" $CI_PROJECT_DIR/coverals/ \;
-          find ../../../bin.v2/ -name "*.da" -exec cp "{}" $CI_PROJECT_DIR/coverals/ \;
-          find ../../../bin.v2/ -name "*.no" -exec cp "{}" $CI_PROJECT_DIR/coverals/ \;
-          wget https://github.com/linux-test-project/lcov/archive/v1.14.zip
-          unzip v1.14.zip
-          LCOV="`pwd`/lcov-1.14/bin/lcov --gcov-tool $CI_GCOVTOOL"
-          mkdir -p ~/.local/bin
-          echo -e "#!/bin/bash\nexec llvm-cov-${CI_LLVM_VER} gcov \"\$@\"" > ~/.local/bin/gcov_for_clang.sh
-          chmod 755 ~/.local/bin/gcov_for_clang.sh
-          echo "$LCOV --directory $CI_PROJECT_DIR/coverals --base-directory `pwd` --capture --output-file $CI_PROJECT_DIR/coverals/coverage.info"
-          $LCOV --directory $CI_PROJECT_DIR/coverals --base-directory `pwd` --capture --output-file $CI_PROJECT_DIR/coverals/coverage.info
-          cd $CI_BOOST_ROOT_DIR
-          $LCOV --remove $CI_PROJECT_DIR/coverals/coverage.info "/usr*" "*/$CI_BOOST_IN_LIBS_DIR/test/*" $IGNORE_COVERAGE "*/$CI_BOOST_IN_LIBS_DIR/tests/*" "*/$CI_BOOST_IN_LIBS_DIR/examples/*" "*/$CI_BOOST_IN_LIBS_DIR/example/*" -o $CI_PROJECT_DIR/coverals/coverage.info
-          OTHER_LIBS=`grep "submodule .*" .gitmodules | sed 's/\[submodule\ "\(.*\)"\]/"\*\/boost\/\1\.hpp" "\*\/boost\/\1\/\*"/g'| sed "/\"\*\/boost\/$CI_BOOST_IN_LIBS_DIR\/\*\"/d" | sed ':a;N;$!ba;s/\n/ /g'`
-          echo $OTHER_LIBS
-          eval "$LCOV --remove $CI_PROJECT_DIR/coverals/coverage.info $OTHER_LIBS -o $CI_PROJECT_DIR/coverals/coverage.info"
+              mkdir -p $CI_PROJECT_DIR/coverals
+
+              cd $CI_BOOST_ROOT_DIR/libs/$CI_BOOST_IN_LIBS_DIR/test/
+              find ../../../bin.v2/ -name "*.gcda" -exec cp "{}" $CI_PROJECT_DIR/coverals/ \;
+              find ../../../bin.v2/ -name "*.gcno" -exec cp "{}" $CI_PROJECT_DIR/coverals/ \;
+              find ../../../bin.v2/ -name "*.da" -exec cp "{}" $CI_PROJECT_DIR/coverals/ \;
+              find ../../../bin.v2/ -name "*.no" -exec cp "{}" $CI_PROJECT_DIR/coverals/ \;
+              wget https://github.com/linux-test-project/lcov/archive/v1.14.zip
+              unzip v1.14.zip
+              LCOV="`pwd`/lcov-1.14/bin/lcov --gcov-tool $CI_GCOVTOOL"
+              mkdir -p ~/.local/bin
+              echo -e "#!/bin/bash\nexec llvm-cov-${CI_LLVM_VER} gcov \"\$@\"" > ~/.local/bin/gcov_for_clang.sh
+              chmod 755 ~/.local/bin/gcov_for_clang.sh
+              echo "$LCOV --directory $CI_PROJECT_DIR/coverals --base-directory `pwd` --capture --output-file $CI_PROJECT_DIR/coverals/coverage.info"
+              $LCOV --directory $CI_PROJECT_DIR/coverals --base-directory `pwd` --capture --output-file $CI_PROJECT_DIR/coverals/coverage.info
+              cd $CI_BOOST_ROOT_DIR
+              $LCOV --remove $CI_PROJECT_DIR/coverals/coverage.info "/usr*" "*/$CI_BOOST_IN_LIBS_DIR/test/*" $CI_IGNORE_COVERAGE "*/$CI_BOOST_IN_LIBS_DIR/tests/*" "*/$CI_BOOST_IN_LIBS_DIR/examples/*" "*/$CI_BOOST_IN_LIBS_DIR/example/*" -o $CI_PROJECT_DIR/coverals/coverage.info
+              OTHER_LIBS=`grep "submodule .*" .gitmodules | sed 's/\[submodule\ "\(.*\)"\]/"\*\/boost\/\1\.hpp" "\*\/boost\/\1\/\*"/g'| sed "/\"\*\/boost\/$CI_BOOST_IN_LIBS_DIR\/\*\"/d" | sed ':a;N;$!ba;s/\n/ /g'`
+              echo $OTHER_LIBS
+              eval "$LCOV --remove $CI_PROJECT_DIR/coverals/coverage.info $OTHER_LIBS -o $CI_PROJECT_DIR/coverals/coverage.info"
+          }
+
+          ci_preprocess_coverage
 
       - name: Coveralls
         uses: coverallsapp/github-action@master
