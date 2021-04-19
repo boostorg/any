@@ -55,7 +55,7 @@ jobs:
             gcovtool: "gcov_for_clang.sh"
           - name: "Clang-3.8"
             buildtype: "boost"
-            packages: "llvm-3.8"
+            packages: "clang-3.8 llvm-3.8"
             packages_to_remove: ""
             os: "ubuntu-16.04"
             llvm_os: ""
