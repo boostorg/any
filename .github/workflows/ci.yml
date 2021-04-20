@@ -55,8 +55,7 @@ jobs:
             cxxstd: "03,11,14,17,2a"
             os: ubuntu-20.04
             cxxflags: "cxxflags=--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
-            linkflags: "linkflags=--coverage -lasan -lubsan"
-            launcher: "testing.launcher=LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libasan.so.4"
+            linkflags: "linkflags=--coverage -lasan -lubsan -static-libasan"
           - toolset: clang
             cxxstd: "03,11,14,17,2a"
             os: macos-10.15
@@ -115,6 +114,9 @@ jobs:
           find ../boost-root/bin.v2/ -name "*.gcno" -exec cp "{}" ../code_coverage/ \;
           find ../boost-root/bin.v2/ -name "*.da" -exec cp "{}" ../code_coverage/ \;
           find ../boost-root/bin.v2/ -name "*.no" -exec cp "{}" ../code_coverage/ \;
+
+          cd ../code_coverage/
+          find $GITHUB_WORKSPACE/include $GITHUB_WORKSPACE/src -name '*pp' -exec gcov -bf {} \;
 
       - uses: codecov/codecov-action@v1
         with:
