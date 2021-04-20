@@ -90,7 +90,7 @@ jobs:
           cd boost-root
           cp -r $GITHUB_WORKSPACE/* libs/$LIBRARY
           git submodule update --init --depth 10 --jobs 2 tools/boostdep tools/inspect libs/filesystem
-          python tools/boostdep/depinst/depinst.py --git_args "--depth 10 --jobs 2" filesystem
+          python tools/boostdep/depinst/depinst.py --git_args "--depth 10 --jobs 3" filesystem
           python tools/boostdep/depinst/depinst.py --git_args "--depth 10 --jobs 3" $LIBRARY
           ./bootstrap.sh
           ./b2 -d0 headers
@@ -104,7 +104,7 @@ jobs:
       - name: Run tests
         run: |
           cd ../boost-root
-          ./b2 -j3 libs/$LIBRARY/test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} variant=debug,release cxxflags=${{matrix.cxxflags}} linkflags=${{matrix.linkflags}}
+          ./b2 -j3 libs/$LIBRARY/test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} variant=debug,release "cxxflags=${{matrix.cxxflags}}" "linkflags=${{matrix.linkflags}}"
           dist/bin/inspect libs/$LIBRARY/test
 
       - uses: codecov/codecov-action@v1
