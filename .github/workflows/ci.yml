@@ -51,13 +51,13 @@ jobs:
             compiler: clang++-9
             cxxstd: "03,11,14,17,2a"
             os: ubuntu-20.04
+            cxxflags: "cxxflags=--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
+            linkflags: "linkflags=--coverage -lasan -lubsan -static-libsan"
+            gcov_tool: "llvm-cov-9 gcov"
           - toolset: clang
             compiler: clang++-10
             cxxstd: "03,11,14,17,2a"
             os: ubuntu-20.04
-            cxxflags: "cxxflags=--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
-            linkflags: "linkflags=--coverage -lasan -lubsan -static-libsan"
-            gcov_tool: "gcov"
           - toolset: clang
             cxxstd: "03,11,14,17,2a"
             os: macos-10.15
@@ -111,18 +111,15 @@ jobs:
           dist/bin/inspect libs/$LIBRARY/test
 
       - name: Prepare coverage data
+        if: matrix.gcov_tool
         run: |
-          if [ -z "${{matrix.gcov_tool}}" ]; then
-              exit 0
-          fi
-
           mkdir -p $GITHUB_WORKSPACE/coveralls
 
           echo -e "#!/bin/bash\nexec ${{matrix.gcov_tool}} \"\$@\"" > $GITHUB_WORKSPACE/coveralls/gcov_wrapper.sh
           chmod +x $GITHUB_WORKSPACE/coveralls/gcov_wrapper.sh
           wget https://github.com/linux-test-project/lcov/archive/v1.15.zip
           unzip v1.15.zip
-          LCOV="`pwd`/lcov-1.15/bin/lcov --gcov-tool $GITHUB_WORKSPACE/code_coverage/gcov_wrapper.sh"
+          LCOV="`pwd`/lcov-1.15/bin/lcov --gcov-tool $GITHUB_WORKSPACE/coveralls/gcov_wrapper.sh"
 
           echo "$LCOV --directory $GITHUB_WORKSPACE/coveralls --base-directory `pwd`/libs/$LIBRARY/test --capture --output-file $GITHUB_WORKSPACE/coveralls/coverage.info"
           $LCOV --directory ../boost-root/bin.v2/libs/$LIBRARY/ --base-directory ../boost-root/ --capture --output-file $GITHUB_WORKSPACE/coveralls/coverage.info
@@ -135,6 +132,7 @@ jobs:
 
       - name: Coveralls
         uses: coverallsapp/github-action@master
+        if: matrix.gcov_tool
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: ./coveralls/coverage.info
