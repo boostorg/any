@@ -9,7 +9,7 @@
 int main()
 {
     boost::anys::basic_any<> bany;
-    boost::anys::basic_any<256, 32> antoher(10);
+    boost::anys::basic_any<256, 32> another(10);
     bany = another;
 }
 
