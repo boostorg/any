@@ -596,10 +596,10 @@ public:
 
               <para>There are certain applications that require <code><classname>boost::any</classname></code>
               functionality, do know the typical/maximal size of the stored object and wish to avoid dynamic memory
-              allocation overhead. Such applications should make a typedef for <code>basic_any</code> with the
-              <code>OptimizeForSize</code> and <code>OptimizeForAlignment</code> template parameters set to
+              allocation overhead. For the convenience such applications may create a typedef for <code>basic_any</code>
+              with the <code>OptimizeForSize</code> and <code>OptimizeForAlignment</code> template parameters set to
               typical/maximal size and alignment of types respectively. Memory allocation would be avoided
-              for storing nothrow move constructible types with size and alignment less or
+              for storing nothrow move constructible types with size and alignment less than or
               equal to the <code>OptimizeForSize</code> and <code>OptimizeForAlignment</code> values.</para>
 
               <para>Otherwise just use <code><classname>boost::any</classname></code>.</para>
@@ -915,7 +915,7 @@ public:
 
           <purpose><simpara>Custom keyword cast for extracting a value
           of a given type from an
-          <code><classname>basic_any</classname></code>. Also awailable from <code>boost</code> namespace.</simpara></purpose>
+          <code><classname>basic_any</classname></code>. Also available from <code>boost</code> namespace.</simpara></purpose>
 
           <returns><simpara> If passed a pointer, it returns a
           similarly qualified pointer to the value content if
@@ -928,7 +928,7 @@ public:
           <code><classname>basic_any</classname></code> pointer do not
           throw; overloads taking an
           <code><classname>basic_any</classname></code> value or reference
-          throws <code><classname>bad_any_cast</classname></code> if
+          throw <code><classname>bad_any_cast</classname></code> if
           unsuccessful.</simpara></throws>
 
         </overloaded-function>
