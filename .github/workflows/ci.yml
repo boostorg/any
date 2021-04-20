@@ -34,8 +34,8 @@ jobs:
           - toolset: gcc-10
             cxxstd: "03,11,14,17,2a"
             os: ubuntu-18.04
-            cxxflags: "--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
-            linkflags: "--coverage  -lasan -lubsan"
+            cxxflags: "cxxflags=--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
+            linkflags: "linkflags=--coverage  -lasan -lubsan"
           - toolset: clang
             compiler: clang++-3.7
             cxxstd: "03,11,14"
@@ -54,13 +54,13 @@ jobs:
             compiler: clang++-10
             cxxstd: "03,11,14,17,2a"
             os: ubuntu-20.04
-            cxxflags: "--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
-            linkflags: "--coverage  -lasan -lubsan"
+            cxxflags: "cxxflags=--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
+            linkflags: "linkflags=--coverage  -lasan -lubsan"
           - toolset: clang
             cxxstd: "03,11,14,17,2a"
             os: macos-10.15
-            cxxflags: "--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
-            linkflags: "--coverage  -lasan -lubsan"
+            cxxflags: "cxxflags=--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
+            linkflags: "linkflags=--coverage  -lasan -lubsan"
             
 
     runs-on: ${{matrix.os}}
@@ -104,10 +104,12 @@ jobs:
       - name: Run tests
         run: |
           cd ../boost-root
-          ./b2 -j3 libs/$LIBRARY/test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} variant=debug,release "cxxflags=${{matrix.cxxflags}}" "linkflags=${{matrix.linkflags}}"
+          ./b2 -j3 libs/$LIBRARY/test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} variant=debug,release "${{matrix.cxxflags}}" "${{matrix.linkflags}}"
           dist/bin/inspect libs/$LIBRARY/test
 
       - uses: codecov/codecov-action@v1
+        with:
+          directory: ../boost-root/bin.v2
   windows:
     strategy:
       fail-fast: false
