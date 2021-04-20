@@ -36,6 +36,7 @@ jobs:
             os: ubuntu-18.04
             cxxflags: "cxxflags=--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
             linkflags: "linkflags=--coverage -lasan -lubsan"
+            gcov_tool: "gcov-10"
           - toolset: clang
             compiler: clang++-3.7
             cxxstd: "03,11,14"
@@ -56,11 +57,13 @@ jobs:
             os: ubuntu-20.04
             cxxflags: "cxxflags=--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
             linkflags: "linkflags=--coverage -lasan -lubsan -static-libasan"
+            gcov_tool: "gcov"
           - toolset: clang
             cxxstd: "03,11,14,17,2a"
             os: macos-10.15
             cxxflags: "cxxflags=--coverage -fsanitize=address,undefined -fno-sanitize-recover=undefined"
             linkflags: "linkflags=--coverage -fsanitize=address,undefined"
+            gcov_tool: "gcov"
             
 
     runs-on: ${{matrix.os}}
@@ -107,20 +110,36 @@ jobs:
           ./b2 -j3 libs/$LIBRARY/test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} variant=debug,release "${{matrix.cxxflags}}" "${{matrix.linkflags}}" "${{matrix.launcher}}"
           dist/bin/inspect libs/$LIBRARY/test
 
-      - name: Prepare coverage
+      - name: Prepare coverage data
         run: |
-          mkdir -p ../code_coverage
-          find ../boost-root/bin.v2/ -name "*.gcda" -exec cp "{}" ../code_coverage/ \;
-          find ../boost-root/bin.v2/ -name "*.gcno" -exec cp "{}" ../code_coverage/ \;
-          find ../boost-root/bin.v2/ -name "*.da" -exec cp "{}" ../code_coverage/ \;
-          find ../boost-root/bin.v2/ -name "*.no" -exec cp "{}" ../code_coverage/ \;
+          if [ -z "${{matrix.gcov_tool}}" ]; then
+              exit 0
+          fi
 
-          cd ../code_coverage/
-          find $GITHUB_WORKSPACE/include $GITHUB_WORKSPACE/src -name '*pp' -exec gcov -bf {} \;
+          mkdir -p $GITHUB_WORKSPACE/coveralls
 
-      - uses: codecov/codecov-action@v1
+          echo -e "#!/bin/bash\nexec ${{matrix.gcov_tool}} \"\$@\"" > $GITHUB_WORKSPACE/coveralls/gcov_wrapper.sh
+          chmod +x $GITHUB_WORKSPACE/coveralls/gcov_wrapper.sh
+          wget https://github.com/linux-test-project/lcov/archive/v1.15.zip
+          unzip v1.15.zip
+          LCOV="`pwd`/lcov-1.15/bin/lcov --gcov-tool $GITHUB_WORKSPACE/code_coverage/gcov_wrapper.sh"
+
+          echo "$LCOV --directory $GITHUB_WORKSPACE/coveralls --base-directory `pwd`/libs/$LIBRARY/test --capture --output-file $GITHUB_WORKSPACE/coveralls/coverage.info"
+          $LCOV --directory ../boost-root/bin.v2/libs/$LIBRARY/ --base-directory ../boost-root/ --capture --output-file $GITHUB_WORKSPACE/coveralls/coverage.info
+          $LCOV --remove $GITHUB_WORKSPACE/coveralls/coverage.info "/usr*" "*/$LIBRARY/test/*" ${{matrix.ignore_coverage}} "*/$LIBRARY/tests/*" "*/$LIBRARY/examples/*" "*/$LIBRARY/example/*" -o $GITHUB_WORKSPACE/coveralls/coverage.info
+
+          cd ../boost-root
+          OTHER_LIBS=`grep "submodule .*" .gitmodules | sed 's/\[submodule\ "\(.*\)"\]/"\*\/boost\/\1\.hpp" "\*\/boost\/\1\/\*"/g'| sed "/\"\*\/boost\/$LIBRARY\/\*\"/d" | sed ':a;N;$!ba;s/\n/ /g'`
+          echo $OTHER_LIBS
+          eval "$LCOV --remove $GITHUB_WORKSPACE/coveralls/coverage.info $OTHER_LIBS -o $GITHUB_WORKSPACE/coveralls/coverage.info"
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
         with:
-          directory: ../code_coverage
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./coveralls/coverage.info
+          parallel: true
+
   windows:
     strategy:
       fail-fast: false
@@ -172,3 +191,12 @@ jobs:
           cd ../boost-root
           b2 -j3 libs/%LIBRARY%/test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} address-model=${{matrix.addrmd}} variant=debug,release
 
+  finish:
+    needs: posix
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        parallel-finished: true
