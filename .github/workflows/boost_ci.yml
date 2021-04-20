@@ -17,10 +17,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - toolset: gcc-4.7
-            cxxstd: "03,11"
-            os: ubuntu-16.04
-            install: g++-4.7
           - toolset: gcc-4.8
             cxxstd: "03,11"
             os: ubuntu-16.04
@@ -29,18 +25,8 @@ jobs:
             cxxstd: "03,11"
             os: ubuntu-16.04
             install: g++-4.9
-          - toolset: gcc-5
-            cxxstd: "03,11,14,1z"
-            os: ubuntu-16.04
-          - toolset: gcc-6
-            cxxstd: "03,11,14,1z"
-            os: ubuntu-16.04
-            install: g++-6
           - toolset: gcc-7
             cxxstd: "03,11,14,17"
-            os: ubuntu-18.04
-          - toolset: gcc-8
-            cxxstd: "03,11,14,17,2a"
             os: ubuntu-18.04
           - toolset: gcc-9
             cxxstd: "03,11,14,17,2a"
@@ -48,54 +34,18 @@ jobs:
           - toolset: gcc-10
             cxxstd: "03,11,14,17,2a"
             os: ubuntu-18.04
-          - toolset: clang
-            compiler: clang++-3.5
-            cxxstd: "03,11,14"
-            os: ubuntu-16.04
-            install: clang-3.5
-          - toolset: clang
-            compiler: clang++-3.6
-            cxxstd: "03,11,14"
-            os: ubuntu-16.04
-            install: clang-3.6
+            cxxflags: "--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
+            linkflags: "--coverage  -lasan -lubsan"
           - toolset: clang
             compiler: clang++-3.7
             cxxstd: "03,11,14"
             os: ubuntu-16.04
             install: clang-3.7
           - toolset: clang
-            compiler: clang++-3.8
-            cxxstd: "03,11,14"
-            os: ubuntu-16.04
-            install: clang-3.8
-          - toolset: clang
-            compiler: clang++-3.9
-            cxxstd: "03,11,14"
-            os: ubuntu-16.04
-            install: clang-3.9
-          - toolset: clang
-            compiler: clang++-4.0
-            cxxstd: "03,11,14"
-            os: ubuntu-16.04
-            install: clang-4.0
-          - toolset: clang
-            compiler: clang++-5.0
-            cxxstd: "03,11,14,1z"
-            os: ubuntu-16.04
-            install: clang-5.0
-          - toolset: clang
-            compiler: clang++-6.0
-            cxxstd: "03,11,14,17"
-            os: ubuntu-18.04
-          - toolset: clang
             compiler: clang++-7
             cxxstd: "03,11,14,17"
             os: ubuntu-18.04
             install: clang-7
-          - toolset: clang
-            compiler: clang++-8
-            cxxstd: "03,11,14,17,2a"
-            os: ubuntu-20.04
           - toolset: clang
             compiler: clang++-9
             cxxstd: "03,11,14,17,2a"
@@ -104,9 +54,14 @@ jobs:
             compiler: clang++-10
             cxxstd: "03,11,14,17,2a"
             os: ubuntu-20.04
+            cxxflags: "--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
+            linkflags: "--coverage  -lasan -lubsan"
           - toolset: clang
             cxxstd: "03,11,14,17,2a"
             os: macos-10.15
+            cxxflags: "--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
+            linkflags: "--coverage  -lasan -lubsan"
+            
 
     runs-on: ${{matrix.os}}
 
@@ -131,13 +86,14 @@ jobs:
           BOOST_BRANCH=develop && [ "$REF" == "master" ] && BOOST_BRANCH=master || true
           echo BOOST_BRANCH: $BOOST_BRANCH
           cd ..
-          git clone -b $BOOST_BRANCH --depth 1 https://github.com/boostorg/boost.git boost-root
+          git clone -b $BOOST_BRANCH --depth 10 https://github.com/boostorg/boost.git boost-root
           cd boost-root
           cp -r $GITHUB_WORKSPACE/* libs/$LIBRARY
-          git submodule update --init tools/boostdep
-          python tools/boostdep/depinst/depinst.py --git_args "--jobs 3" $LIBRARY
+          git submodule update --init tools/boostdep tools/inspect
+          python tools/boostdep/depinst/depinst.py --git_args "--depth 10 --jobs 3" $LIBRARY
           ./bootstrap.sh
           ./b2 -d0 headers
+          ./b2 -j4 variant=debug tools/inspect/build
 
       - name: Create user-config.jam
         if: matrix.compiler
@@ -147,7 +103,8 @@ jobs:
       - name: Run tests
         run: |
           cd ../boost-root
-          ./b2 -j3 libs/$LIBRARY/test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} variant=debug,release
+          ./b2 -j3 libs/$LIBRARY/test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} variant=debug,release cxxflags=${{matrix.cxxflags}} linkflags=${{matrix.linkflags}}
+          dist/bin/inspect libs/$LIBRARY/test
 
       - uses: codecov/codecov-action@v1
   windows:
