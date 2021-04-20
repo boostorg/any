@@ -56,7 +56,7 @@ jobs:
             cxxstd: "03,11,14,17,2a"
             os: ubuntu-20.04
             cxxflags: "cxxflags=--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
-            linkflags: "linkflags=--coverage -lasan -lubsan -static-libasan"
+            linkflags: "linkflags=--coverage -lasan -lubsan -static-libsan"
             gcov_tool: "gcov"
           - toolset: clang
             cxxstd: "03,11,14,17,2a"
