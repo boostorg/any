@@ -47,12 +47,14 @@ jobs:
             cxxstd: "03,11,14,17"
             os: ubuntu-18.04
             install: clang-7
+            cxxflags: "cxxflags=-fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
+            linkflags: "linkflags=-lasan -lubsan"
           - toolset: clang
             compiler: clang++-9
             cxxstd: "03,11,14,17,2a"
             os: ubuntu-20.04
-            cxxflags: "cxxflags=--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined"
-            linkflags: "linkflags=--coverage -lasan -lubsan -static-libsan"
+            cxxflags: "cxxflags=--coverage"
+            linkflags: "linkflags=--coverage"
             gcov_tool: "llvm-cov-9 gcov"
           - toolset: clang
             compiler: clang++-10
@@ -61,9 +63,8 @@ jobs:
           - toolset: clang
             cxxstd: "03,11,14,17,2a"
             os: macos-10.15
-            cxxflags: "cxxflags=--coverage -fsanitize=address,undefined -fno-sanitize-recover=undefined"
-            linkflags: "linkflags=--coverage -fsanitize=address,undefined"
-            gcov_tool: "gcov"
+            cxxflags: "cxxflags=-fsanitize=address,undefined -fno-sanitize-recover=undefined"
+            linkflags: "linkflags=-fsanitize=address,undefined"
             
 
     runs-on: ${{matrix.os}}
