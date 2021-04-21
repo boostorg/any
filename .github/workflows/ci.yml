@@ -21,10 +21,6 @@ jobs:
             cxxstd: "03,11"
             os: ubuntu-16.04
             install: g++-4.8
-          - toolset: gcc-4.9
-            cxxstd: "03,11"
-            os: ubuntu-16.04
-            install: g++-4.9
           - toolset: gcc-7
             cxxstd: "03,11,14,17"
             os: ubuntu-18.04
@@ -42,13 +38,6 @@ jobs:
             cxxstd: "03,11,14"
             os: ubuntu-16.04
             install: clang-3.7
-          - toolset: clang
-            compiler: clang++-7
-            cxxstd: "03,11,14,17"
-            os: ubuntu-18.04
-            install: clang-7
-            cxxflags: "cxxflags=-fsanitize=undefined -fno-sanitize-recover=undefined"
-            linkflags: "linkflags=-lubsan"
           - toolset: clang
             compiler: clang++-9
             cxxstd: "03,11,14,17,2a"
