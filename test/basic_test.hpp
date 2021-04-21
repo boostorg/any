@@ -19,6 +19,8 @@
 #include <vector>
 #include <utility>
 
+#include <boost/type_traits/is_base_and_derived.hpp>
+
 #include "test.hpp"
 
 namespace any_tests {
@@ -238,6 +240,19 @@ struct basic_tests  // test definitions
             "any_cast to incorrect const reference type");
     }
 
+    static void test_bad_any_cast()
+    {
+        check_true(
+            boost::is_base_and_derived<std::exception, boost::bad_any_cast>::value,
+            "bad_any_cast base class check"
+        );
+
+        check_true(
+            std::string(boost::bad_any_cast().what()).find("any") != std::string::npos,
+            "bad_any_cast notes any in excaption"
+        );
+    }
+
     static void test_with_array()
     {
         Any value1("Char array");
@@ -362,6 +377,7 @@ struct basic_tests  // test definitions
             { "swap member function",           test_swap              },
             { "copying operations on a null",   test_null_copying      },
             { "cast to reference types",        test_cast_to_reference },
+            { "bad_any_cast exception",         test_bad_any_cast      },
             { "storing an array inside",        test_with_array        },
             { "clear() methods",                test_clear             },
             { "testing with vectors",           test_vectors           },
