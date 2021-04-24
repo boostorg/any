@@ -8,6 +8,7 @@ Develop branch: | [![Github Actions CI](https://github.com/boostorg/any/actions/
 Master branch:  | [![Github Actions CI](https://github.com/boostorg/any/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/boostorg/any/actions/workflows/ci.yml) [![Build status](https://ci.appveyor.com/api/projects/status/dmugl75nfhjnx7ot/branch/master?svg=true)](https://ci.appveyor.com/project/apolukhin/any/branch/master) | [![Coverage Status](https://coveralls.io/repos/boostorg/any/badge.png?branch=master)](https://coveralls.io/r/boostorg/any?branch=master) | [details...](http://www.boost.org/development/tests/master/developer/any.html)
 
 
+[Latest developer documentation](https://www.boost.org/doc/libs/develop/doc/html/any.html)
 
 ### License
 
