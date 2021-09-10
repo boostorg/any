@@ -73,11 +73,6 @@ jobs:
           ./b2 -d0 headers
           ./b2 -j4 variant=debug tools/inspect/build
 
-      - name: Create user-config.jam
-        if: matrix.compiler
-        run: |
-          echo "using ${{matrix.toolset}} : : ${{matrix.compiler}} ;" > ~/user-config.jam
-
       - name: Run tests
         run: |
           cd ../boost-root
