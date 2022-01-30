@@ -18,7 +18,7 @@
 #error Header <boost/any/unique_any.hpp> requires C++11 compatible compiler with move semantics
 #endif
 
-#ifdef BOOST_NO_DEFAULTED_FUNCTIONS
+#ifdef BOOST_NO_CXX11_DEFAULTED_FUNCTIONS
 #error Header <boost/any/unique_any.hpp> requires C++11 compatible compiler with defaulted functions
 #endif
 
