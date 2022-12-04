@@ -26,7 +26,7 @@
 #include <boost/type_traits/is_const.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/static_assert.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <boost/core/enable_if.hpp>
 #include <boost/core/addressof.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/conditional.hpp>
