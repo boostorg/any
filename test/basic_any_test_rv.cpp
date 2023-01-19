@@ -2,7 +2,7 @@
 //
 //  See http://www.boost.org for most recent version, including documentation.
 //
-//  Copyright Antony Polukhin, 2013-2022.
+//  Copyright Antony Polukhin, 2013-2023.
 //  Copyright Ruslan Arutyunyan, 2019-2021.
 //
 //  Distributed under the Boost
