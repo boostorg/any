@@ -6,6 +6,8 @@
 # For more information, see http://www.boost.org/libs/any
 #
 
+build-project unique_any ;
+
 import testing ;
 
 test-suite any :
