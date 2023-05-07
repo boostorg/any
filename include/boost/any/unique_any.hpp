@@ -36,7 +36,6 @@
 
 #include <boost/any/bad_any_cast.hpp>
 
-#include <boost/core/enable_if.hpp>
 #include <boost/type_index.hpp>
 
 namespace boost { namespace anys {
@@ -60,8 +59,10 @@ public:
     // Perfect forwarding of T
     template<typename T>
     unique_any(T&& value
-        , typename boost::disable_if<std::is_same<unique_any&, T> >::type* = 0 // disable if value has type `unique_any&`
-        , typename boost::disable_if<std::is_const<T> >::type* = 0) // disable if value has type `const T&&`
+        , typename std::enable_if<
+            !std::is_same<unique_any&, T>::value // disable if value has type `unique_any&`
+            && !std::is_const<T>::value
+        >::type* = 0) // disable if value has type `const T&&`
       : content(new holder< typename std::decay<T>::type >(std::forward<T>(value)))
     {
     }
@@ -98,7 +99,7 @@ public:
 
     template<class T, class U, class... Args>
     typename std::decay<T>::type& emplace(std::initializer_list<U> il, Args&&... args) {
-        auto* raw_ptr = holder<typename std::decay<T>::type>(il, std::forward<Args>(args)...);
+        auto* raw_ptr = new holder<typename std::decay<T>::type>(il, std::forward<Args>(args)...);
         content = std::unique_ptr<placeholder>(raw_ptr);
         return raw_ptr->held;
     }
@@ -248,7 +249,7 @@ inline T any_cast(const unique_any & operand)
 template<typename T>
 inline T any_cast(unique_any&& operand)
 {
-    BOOST_STATIC_ASSERT_MSG(
+    static_assert(
         std::is_rvalue_reference<T&&>::value /*true if T is rvalue or just a value*/
         || std::is_const< typename std::remove_reference<T>::type >::value,
         "boost::any_cast shall not be used for getting nonconst references to temporary objects"

@@ -21,6 +21,8 @@ class any;
 
 namespace anys {
 
+class unique_any;
+
 template<std::size_t OptimizeForSize = sizeof(void*), std::size_t OptimizeForAlignment = boost::alignment_of<void*>::value>
 class basic_any;
 
