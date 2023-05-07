@@ -163,10 +163,6 @@ private: // types
 
 
 private: // representation
-
-    template<typename T>
-    friend T * any_cast(unique_any *) noexcept;
-
     template<typename T>
     friend T * unsafe_any_cast(unique_any *) noexcept;
 
@@ -178,29 +174,47 @@ inline void swap(unique_any & lhs, unique_any & rhs) noexcept
     lhs.swap(rhs);
 }
 
+
+// Note: The "unsafe" versions of any_cast are not part of the
+// public interface and may be removed at any time. They are
+// required where we know what type is stored in the any and can't
+// use typeid() comparison, e.g., when our types may travel across
+// different shared libraries.
+template<typename T>
+inline T * unsafe_any_cast(unique_any * operand) noexcept
+{
+    return std::addressof(
+        static_cast<unique_any::holder<T>&>(*operand->content).held
+    );
+}
+
+template<typename T>
+inline const T * unsafe_any_cast(const unique_any * operand) noexcept
+{
+    return anys::unsafe_any_cast<T>(const_cast<unique_any *>(operand));
+}
+
 template<typename T>
 T * any_cast(unique_any * operand) noexcept
 {
     return operand && operand->type() == boost::typeindex::type_id<T>()
-        ? std::addressof(
-            static_cast<unique_any::holder<typename remove_cv<T>::type>&>(*operand->content).held
-          )
+        ? anys::unsafe_any_cast<typename std::remove_cv<T>::type>(operand)
         : nullptr;
 }
 
 template<typename T>
 inline const T * any_cast(const unique_any * operand) noexcept
 {
-    return any_cast<T>(const_cast<unique_any *>(operand));
+    return anys::any_cast<T>(const_cast<unique_any *>(operand));
 }
 
 template<typename T>
 T any_cast(unique_any & operand)
 {
-    typedef typename remove_reference<T>::type nonref;
+    typedef typename std::remove_reference<T>::type nonref;
 
 
-    nonref * result = any_cast<nonref>(std::addressof(operand));
+    nonref * result = anys::any_cast<nonref>(std::addressof(operand));
     if(!result)
         boost::throw_exception(bad_any_cast());
 
@@ -227,8 +241,8 @@ T any_cast(unique_any & operand)
 template<typename T>
 inline T any_cast(const unique_any & operand)
 {
-    typedef typename remove_reference<T>::type nonref;
-    return any_cast<const nonref &>(const_cast<unique_any &>(operand));
+    typedef typename std::remove_reference<T>::type nonref;
+    return anys::any_cast<const nonref &>(const_cast<unique_any &>(operand));
 }
 
 template<typename T>
@@ -239,27 +253,7 @@ inline T any_cast(unique_any&& operand)
         || std::is_const< typename std::remove_reference<T>::type >::value,
         "boost::any_cast shall not be used for getting nonconst references to temporary objects"
     );
-    return any_cast<T>(operand);
-}
-
-
-// Note: The "unsafe" versions of any_cast are not part of the
-// public interface and may be removed at any time. They are
-// required where we know what type is stored in the any and can't
-// use typeid() comparison, e.g., when our types may travel across
-// different shared libraries.
-template<typename T>
-inline T * unsafe_any_cast(unique_any * operand) noexcept
-{
-    return std::addressof(
-        static_cast<unique_any::holder<T>&>(*operand->content)->held
-    );
-}
-
-template<typename T>
-inline const T * unsafe_any_cast(const unique_any * operand) noexcept
-{
-    return unsafe_any_cast<T>(const_cast<unique_any *>(operand));
+    return std::move(anys::any_cast<T&>(operand));
 }
 
 } // namespace anys

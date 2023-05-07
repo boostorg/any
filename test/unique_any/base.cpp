@@ -21,16 +21,13 @@ void test_basic() {
     BOOST_TEST_EQ(boost::anys::any_cast<int>(a), 42);
     BOOST_TEST_EQ(boost::any_cast<int&>(a), 42);
     BOOST_TEST_EQ(boost::anys::any_cast<int&>(a), 42);
+    BOOST_TEST_EQ(&boost::any_cast<int&>(a), &i);
+    BOOST_TEST_EQ(&boost::anys::any_cast<int&>(a), &i);
 
     boost::anys::unique_any b = std::move(a);
     BOOST_TEST(!a.has_value());
     BOOST_TEST(b.has_value());
-    BOOST_TEST_EQ(&boost::any_cast<int&>(b), &i);
-    BOOST_TEST_EQ(i, 42);
-
-    i = 43;
-    BOOST_TEST_EQ(boost::any_cast<int>(b), 43);
-    BOOST_TEST_EQ(boost::anys::any_cast<int>(b), 43);
+    BOOST_TEST_EQ(boost::any_cast<int&>(b), 42);
 
     b.reset();
     BOOST_TEST(!b.has_value());
@@ -90,8 +87,7 @@ void test_swap() {
     std::vector<int> ethalon_vec{1, 2, 3, 4, 5};
     b = ethalon_vec;
 
-    auto& int_ref = boost::any_cast<int&>(a);
-    auto& vec_ref = boost::any_cast<std::vector<int>&>(b);
+    auto* vec_data = boost::any_cast<std::vector<int>&>(b).data();
 
     swap(a, b);
     BOOST_TEST(a.has_value());
@@ -100,8 +96,7 @@ void test_swap() {
     BOOST_TEST_EQ(boost::any_cast<int>(b), 42);
     BOOST_TEST(boost::any_cast<std::vector<int>>(a) == ethalon_vec);
 
-    BOOST_TEST_EQ(&boost::any_cast<std::vector<int>&>(a), &vec_ref);
-    BOOST_TEST_EQ(&boost::any_cast<int&>(b), &int_ref);
+    BOOST_TEST_EQ(boost::any_cast<std::vector<int>&>(a).data(), vec_data);
 }
 
 int main() {
