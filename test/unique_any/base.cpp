@@ -33,6 +33,23 @@ void test_basic() {
     BOOST_TEST(!b.has_value());
 }
 
+void test_bad_any_cast() {
+    boost::anys::unique_any a;
+    a.emplace<int>(42);
+
+    try {
+        boost::any_cast<char>(a);
+        BOOST_TEST(false);
+    } catch (const boost::bad_any_cast&) {
+    }
+
+    try {
+        boost::any_cast<int*>(a);
+        BOOST_TEST(false);
+    } catch (const boost::bad_any_cast&) {
+    }
+}
+
 struct counting_destroy {
     static int destructor_called;
 
@@ -101,6 +118,7 @@ void test_swap() {
 
 int main() {
     test_basic();
+    test_bad_any_cast();
     test_destructor();
     test_swap();
 
