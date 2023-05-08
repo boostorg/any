@@ -33,6 +33,16 @@ namespace detail {
 
     template<std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
     struct is_basic_any<boost::anys::basic_any<OptimizeForSize, OptimizeForAlignment> > : public true_type {};
+
+    template <class T>
+    struct is_some_any: public is_basic_any<T> {};
+
+    template <>
+    struct is_some_any<boost::any>: public boost::true_type {};
+
+    template <>
+    struct is_some_any<boost::anys::unique_any>: public boost::true_type {};
+
 } // namespace detail
 
 } // namespace anys

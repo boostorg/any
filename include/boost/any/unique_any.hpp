@@ -34,6 +34,7 @@
 #include <utility>
 #include <type_traits>
 
+#include <boost/any/fwd.hpp>
 #include <boost/any/bad_any_cast.hpp>
 
 #include <boost/type_index.hpp>
@@ -58,13 +59,19 @@ public:
 
     // Perfect forwarding of T
     template<typename T>
-    unique_any(T&& value
-        , typename std::enable_if<
-            !std::is_same<unique_any&, T>::value // disable if value has type `unique_any&`
-            && !std::is_const<T>::value
-        >::type* = 0) // disable if value has type `const T&&`
+    unique_any(T&& value)
       : content(new holder< typename std::decay<T>::type >(std::forward<T>(value)))
     {
+        static_assert(
+            !boost::anys::detail::is_basic_any< typename std::decay<T>::type >::value,
+            "boost::anys::unique_any could not be constructed from boost::anys::basic_any."
+        );
+
+        static_assert(
+            !boost::anys::detail::is_some_any< typename std::decay<T>::type >::value,
+            "unique_any could be only moved and could not be constructoed from "
+            "other types of any."
+        );
     }
 
     template<class T, class... Args>
