@@ -339,7 +339,7 @@ namespace boost
     }
 
     /// \returns Pointer to a ValueType stored in `operand`, nullptr if
-    /// `operand` does not contain specified ValueType.
+    /// `operand` does not contain specified `ValueType`.
     template<typename ValueType>
     ValueType * any_cast(any * operand) BOOST_NOEXCEPT
     {
@@ -349,7 +349,7 @@ namespace boost
     }
 
     /// \returns Const pointer to a ValueType stored in `operand`, nullptr if
-    /// `operand` does not contain specified ValueType.
+    /// `operand` does not contain specified `ValueType`.
     template<typename ValueType>
     inline const ValueType * any_cast(const any * operand) BOOST_NOEXCEPT
     {
@@ -388,9 +388,9 @@ namespace boost
 #endif
     }
 
-    /// \returns ValueType stored in `operand`
+    /// \returns `ValueType` stored in `operand`
     /// \throws boost::bad_any_cast if `operand` does not contain 
-    /// specified ValueType.
+    /// specified `ValueType`.
     template<typename ValueType>
     inline ValueType any_cast(const any & operand)
     {
@@ -399,9 +399,9 @@ namespace boost
     }
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-    /// \returns ValueType stored in `operand`, leving the `operand` empty.
+    /// \returns `ValueType` stored in `operand`, leaving the `operand` empty.
     /// \throws boost::bad_any_cast if `operand` does not contain 
-    /// specified ValueType.
+    /// specified `ValueType`.
     template<typename ValueType>
     inline ValueType any_cast(any&& operand)
     {

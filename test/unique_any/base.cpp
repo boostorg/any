@@ -33,6 +33,15 @@ void test_basic() {
     BOOST_TEST(!b.has_value());
 }
 
+void test_const() {
+    const boost::anys::unique_any a = 42;
+    BOOST_TEST(a.has_value());
+    BOOST_TEST_EQ(boost::any_cast<int>(a), 42);
+    BOOST_TEST_EQ(boost::anys::any_cast<int>(a), 42);
+    BOOST_TEST_EQ(boost::any_cast<const int&>(a), 42);
+    BOOST_TEST_EQ(boost::anys::any_cast<const int&>(a), 42);
+}
+
 void test_bad_any_cast() {
     boost::anys::unique_any a;
     a.emplace<int>(42);
@@ -118,6 +127,7 @@ void test_swap() {
 
 int main() {
     test_basic();
+    test_const();
     test_bad_any_cast();
     test_destructor();
     test_swap();
