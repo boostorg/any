@@ -44,7 +44,7 @@
 
 namespace boost { namespace anys {
 
-///
+/// Helper type for providing emplacement type to the constructor.
 template <class T>
 struct in_place_type_t
 {
@@ -208,6 +208,7 @@ public:
     }
 
 private: // types
+    /// @cond
     class BOOST_SYMBOL_VISIBLE placeholder
     {
     public:
@@ -248,6 +249,7 @@ private: // representation
     friend T * unsafe_any_cast(unique_any *) noexcept;
 
     std::unique_ptr<placeholder> content;
+    /// @endcond
 };
 
 /// Exchange of the contents of `lhs` and `rhs`.
@@ -257,6 +259,7 @@ inline void swap(unique_any & lhs, unique_any & rhs) noexcept
     lhs.swap(rhs);
 }
 
+/// @cond
 
 // Note: The "unsafe" versions of any_cast are not part of the
 // public interface and may be removed at any time. They are
@@ -276,6 +279,7 @@ inline const T * unsafe_any_cast(const unique_any * operand) noexcept
 {
     return anys::unsafe_any_cast<T>(const_cast<unique_any *>(operand));
 }
+/// @endcond
 
 /// \returns Pointer to a `T` stored in `operand`, nullptr if
 /// `operand` does not contain specified `T`.

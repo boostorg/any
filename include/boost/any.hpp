@@ -239,7 +239,7 @@ namespace boost
 #else
     public: // types (public so any_cast can be non-friend)
 #endif
-
+        /// @cond
         class BOOST_SYMBOL_VISIBLE placeholder
         {
         public: // structors
@@ -309,6 +309,7 @@ namespace boost
 #endif
 
         placeholder * content;
+        /// @endcond
     };
 
     /// Exchange of the contents of `lhs` and `rhs`.
@@ -318,6 +319,7 @@ namespace boost
         lhs.swap(rhs);
     }
 
+    /// @cond
 
     // Note: The "unsafe" versions of any_cast are not part of the
     // public interface and may be removed at any time. They are
@@ -337,6 +339,7 @@ namespace boost
     {
         return boost::unsafe_any_cast<ValueType>(const_cast<any *>(operand));
     }
+    /// @endcond
 
     /// \returns Pointer to a ValueType stored in `operand`, nullptr if
     /// `operand` does not contain specified `ValueType`.

@@ -13,8 +13,12 @@
 # pragma once
 #endif
 
- #include <boost/type_traits/alignment_of.hpp>
+/// \file boost/any/fwd.hpp
+/// \brief Forward declarations of Boost.Any library types.
 
+#include <boost/type_traits/alignment_of.hpp>
+
+/// @cond
 namespace boost {
 
 class any;
@@ -48,5 +52,6 @@ namespace detail {
 } // namespace anys
 
 } // namespace boost
+/// @endcond
 
 #endif  // #ifndef BOOST_ANY_ANYS_FWD_HPP

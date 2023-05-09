@@ -68,6 +68,7 @@ namespace anys {
         BOOST_STATIC_ASSERT_MSG((OptimizeForAlignment & (OptimizeForAlignment - 1)) == 0, "Align shall be a power of 2");
         BOOST_STATIC_ASSERT_MSG(OptimizeForSize % OptimizeForAlignment == 0, "Size shall be multiple of alignment");
     private:
+        /// @cond
         enum operation
         {
             Destroy,
@@ -211,6 +212,8 @@ namespace anys {
             any.content.large_value = new DecayedType(static_cast<ValueType&&>(value));
         }
 #endif
+        /// @endcond
+
     public: // non-type template parameters accessors
             static BOOST_CONSTEXPR_OR_CONST std::size_t buffer_size = OptimizeForSize;
             static BOOST_CONSTEXPR_OR_CONST std::size_t buffer_align = OptimizeForAlignment;
@@ -475,7 +478,7 @@ namespace anys {
         }
 
     private: // representation
-
+        /// @cond
         template<typename ValueType, std::size_t Size, std::size_t Alignment>
         friend ValueType * any_cast(basic_any<Size, Alignment> *) BOOST_NOEXCEPT;
 
@@ -490,6 +493,7 @@ namespace anys {
             void * large_value;
             typename boost::aligned_storage<OptimizeForSize, OptimizeForAlignment>::type small_value;
         } content;
+        /// @endcond
     };
 
     /// Exchange of the contents of `lhs` and `rhs`.
@@ -577,6 +581,8 @@ namespace anys {
 #endif
 
 
+    /// @cond
+
     // Note: The "unsafe" versions of any_cast are not part of the
     // public interface and may be removed at any time. They are
     // required where we know what type is stored in the any and can't
@@ -593,6 +599,7 @@ namespace anys {
     {
         return boost::anys::unsafe_any_cast<ValueType>(const_cast<basic_any<OptimizeForSize, OptimizeForAlignment> *>(operand));
     }
+    /// @endcond
 
 } // namespace anys
 
