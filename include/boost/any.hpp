@@ -33,15 +33,24 @@
 
 namespace boost
 {
+    /// \brief A class whose instances can hold instances of any
+    /// type that satisfies \forcedlink{ValueType} requirements.
     class any
     {
-    public: // structors
+    public:
 
+        /// \post this->empty() is true.
         BOOST_CONSTEXPR any() BOOST_NOEXCEPT
           : content(0)
         {
         }
 
+        /// Makes a copy of `value`, so
+        /// that the initial content of the new instance is equivalent
+        /// in both type and value to `value`.
+        ///
+        /// \throws std::bad_alloc or any exceptions arising from the copy
+        /// constructor of the contained type.
         template<typename ValueType>
         any(const ValueType & value)
           : content(new holder<
@@ -54,20 +63,39 @@ namespace boost
             );
         }
 
+        /// Copy constructor that copies content of
+        /// `other` into new instance, so that any content
+        /// is equivalent in both type and value to the content of
+        /// `other`, or empty if `other` is empty.
+        ///
+        /// \throws May fail with a `std::bad_alloc`
+        /// exception or any exceptions arising from the copy
+        /// constructor of the contained type.
         any(const any & other)
           : content(other.content ? other.content->clone() : 0)
         {
         }
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-        // Move constructor
+        /// Move constructor that moves content of
+        /// `other` into new instance and leaves `other` empty.
+        ///
+        /// \pre C++11 compatible compiler
+        /// \post other->empty() is true
+        /// \throws Nothing.
         any(any&& other) BOOST_NOEXCEPT
           : content(other.content)
         {
             other.content = 0;
         }
 
-        // Perfect forwarding of ValueType
+        /// Forwards <code>value</code>, so
+        /// that the initial content of the new instance is equivalent
+        /// in both type and value to `value` before the forward.
+        ///
+        /// \pre C++11 compatible compiler.
+        /// \throws std::bad_alloc or any exceptions arising from the move or
+        /// copy constructor of the contained type.
         template<typename ValueType>
         any(ValueType&& value
             , typename boost::disable_if<boost::is_same<any&, ValueType> >::type* = 0 // disable if value has type `any&`
@@ -81,6 +109,9 @@ namespace boost
         }
 #endif
 
+        /// Releases any and all resources used in management of instance.
+        ///
+        /// \throws Nothing.
         ~any() BOOST_NOEXCEPT
         {
             delete content;
@@ -88,6 +119,10 @@ namespace boost
 
     public: // modifiers
 
+        /// Exchange of the contents of `*this` and `rhs`.
+        ///
+        /// \returns `*this`
+        /// \throws Nothing.
         any & swap(any & rhs) BOOST_NOEXCEPT
         {
             placeholder* tmp = content;
@@ -96,8 +131,31 @@ namespace boost
             return *this;
         }
 
+        /// Copies content of `rhs` into
+        /// current instance, discarding previous content, so that the
+        /// new content is equivalent in both type and value to the
+        /// content of `rhs`, or empty if `rhs.empty()`.
+        ///
+        /// \throws std::bad_alloc
+        /// or any exceptions arising from the copy constructor of the
+        /// contained type. Assignment satisfies the strong guarantee
+        /// of exception safety.
+        any & operator=(const any& rhs)
+        {
+            any(rhs).swap(*this);
+            return *this;
+        }
 
 #ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
+        /// Makes a copy of `rhs`,
+        /// discarding previous content, so that the new content of is
+        /// equivalent in both type and value to
+        /// `rhs`.
+        ///
+        /// \throws std::bad_alloc
+        /// or any exceptions arising from the copy constructor of the
+        /// contained type. Assignment satisfies the strong guarantee
+        /// of exception safety.
         template<typename ValueType>
         any & operator=(const ValueType & rhs)
         {
@@ -108,21 +166,16 @@ namespace boost
             any(rhs).swap(*this);
             return *this;
         }
-
-        any & operator=(any rhs)
-        {
-            rhs.swap(*this);
-            return *this;
-        }
-
 #else
-        any & operator=(const any& rhs)
-        {
-            any(rhs).swap(*this);
-            return *this;
-        }
-
-        // move assignment
+        /// Moves content of `rhs` into
+        /// current instance, discarding previous content, so that the
+        /// new content is equivalent in both type and value to the
+        /// content of <code>rhs</code> before move, or empty if
+        /// `rhs.empty()`.
+        ///
+        /// \pre C++11 compatible compiler.
+        /// \post `rhs->empty()` is true
+        /// \throws Nothing.
         any & operator=(any&& rhs) BOOST_NOEXCEPT
         {
             rhs.swap(*this);
@@ -130,7 +183,16 @@ namespace boost
             return *this;
         }
 
-        // Perfect forwarding of ValueType
+        /// Forwards `rhs`,
+        /// discarding previous content, so that the new content of is
+        /// equivalent in both type and value to
+        /// `rhs` before forward.
+        ///
+        /// \pre C++11 compatible compiler.
+        /// \throws std::bad_alloc
+        /// or any exceptions arising from the move or copy constructor of the
+        /// contained type. Assignment satisfies the strong guarantee
+        /// of exception safety.
         template <class ValueType>
         any & operator=(ValueType&& rhs)
         {
@@ -145,16 +207,25 @@ namespace boost
 
     public: // queries
 
+        /// \returns `true` if instance is empty, otherwise `false`.
+        /// \throws Nothing.
         bool empty() const BOOST_NOEXCEPT
         {
             return !content;
         }
 
+        /// \post this->empty() is true
         void clear() BOOST_NOEXCEPT
         {
             any().swap(*this);
         }
 
+        /// \returns the `typeid` of the
+        /// contained value if instance is non-empty, otherwise
+        /// `typeid(void)`.
+        ///
+        /// Useful for querying against types known either at compile time or
+        /// only at runtime.
         const boost::typeindex::type_info& type() const BOOST_NOEXCEPT
         {
             return content ? content->type() : boost::typeindex::type_id<void>().type_info();
@@ -225,10 +296,6 @@ namespace boost
 #ifndef BOOST_NO_MEMBER_TEMPLATE_FRIENDS
 
     private: // representation
-
-        template<typename ValueType>
-        friend ValueType * any_cast(any *) BOOST_NOEXCEPT;
-
         template<typename ValueType>
         friend ValueType * unsafe_any_cast(any *) BOOST_NOEXCEPT;
 
@@ -239,37 +306,62 @@ namespace boost
 #endif
 
         placeholder * content;
-
     };
 
+    /// Exchange of the contents of `lhs` and `rhs`.
+    /// \throws Nothing.
     inline void swap(any & lhs, any & rhs) BOOST_NOEXCEPT
     {
         lhs.swap(rhs);
     }
 
+
+    // Note: The "unsafe" versions of any_cast are not part of the
+    // public interface and may be removed at any time. They are
+    // required where we know what type is stored in the any and can't
+    // use typeid() comparison, e.g., when our types may travel across
+    // different shared libraries.
+    template<typename ValueType>
+    inline ValueType * unsafe_any_cast(any * operand) BOOST_NOEXCEPT
+    {
+        return boost::addressof(
+            static_cast<any::holder<ValueType> *>(operand->content)->held
+        );
+    }
+
+    template<typename ValueType>
+    inline const ValueType * unsafe_any_cast(const any * operand) BOOST_NOEXCEPT
+    {
+        return boost::unsafe_any_cast<ValueType>(const_cast<any *>(operand));
+    }
+
+    /// \returns Pointer to a ValueType stored in `operand`, nullptr if
+    /// `operand` does not contain specified ValueType.
     template<typename ValueType>
     ValueType * any_cast(any * operand) BOOST_NOEXCEPT
     {
         return operand && operand->type() == boost::typeindex::type_id<ValueType>()
-            ? boost::addressof(
-                static_cast<any::holder<BOOST_DEDUCED_TYPENAME remove_cv<ValueType>::type> *>(operand->content)->held
-              )
+            ? boost::unsafe_any_cast<BOOST_DEDUCED_TYPENAME boost::remove_cv<ValueType>::type>(operand)
             : 0;
     }
 
+    /// \returns Const pointer to a ValueType stored in `operand`, nullptr if
+    /// `operand` does not contain specified ValueType.
     template<typename ValueType>
     inline const ValueType * any_cast(const any * operand) BOOST_NOEXCEPT
     {
-        return any_cast<ValueType>(const_cast<any *>(operand));
+        return boost::any_cast<ValueType>(const_cast<any *>(operand));
     }
 
+    /// \returns ValueType stored in `operand`
+    /// \throws boost::bad_any_cast if `operand` does not contain 
+    /// specified ValueType.
     template<typename ValueType>
-    ValueType any_cast(any & operand)
+    ValueType boost::any_cast(any & operand)
     {
         typedef BOOST_DEDUCED_TYPENAME remove_reference<ValueType>::type nonref;
 
-
-        nonref * result = any_cast<nonref>(boost::addressof(operand));
+        nonref * result = boost::any_cast<nonref>(boost::addressof(operand));
         if(!result)
             boost::throw_exception(bad_any_cast());
 
@@ -293,14 +385,20 @@ namespace boost
 #endif
     }
 
+    /// \returns ValueType stored in `operand`
+    /// \throws boost::bad_any_cast if `operand` does not contain 
+    /// specified ValueType.
     template<typename ValueType>
     inline ValueType any_cast(const any & operand)
     {
         typedef BOOST_DEDUCED_TYPENAME remove_reference<ValueType>::type nonref;
-        return any_cast<const nonref &>(const_cast<any &>(operand));
+        return boost::any_cast<const nonref &>(const_cast<any &>(operand));
     }
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+    /// \returns ValueType stored in `operand`, leving the `operand` empty.
+    /// \throws boost::bad_any_cast if `operand` does not contain 
+    /// specified ValueType.
     template<typename ValueType>
     inline ValueType any_cast(any&& operand)
     {
@@ -309,29 +407,9 @@ namespace boost
             || boost::is_const< typename boost::remove_reference<ValueType>::type >::value,
             "boost::any_cast shall not be used for getting nonconst references to temporary objects"
         );
-        return any_cast<ValueType>(operand);
+        return boost::any_cast<ValueType>(operand);
     }
 #endif
-
-
-    // Note: The "unsafe" versions of any_cast are not part of the
-    // public interface and may be removed at any time. They are
-    // required where we know what type is stored in the any and can't
-    // use typeid() comparison, e.g., when our types may travel across
-    // different shared libraries.
-    template<typename ValueType>
-    inline ValueType * unsafe_any_cast(any * operand) BOOST_NOEXCEPT
-    {
-        return boost::addressof(
-            static_cast<any::holder<ValueType> *>(operand->content)->held
-        );
-    }
-
-    template<typename ValueType>
-    inline const ValueType * unsafe_any_cast(const any * operand) BOOST_NOEXCEPT
-    {
-        return unsafe_any_cast<ValueType>(const_cast<any *>(operand));
-    }
 }
 
 // Copyright Kevlin Henney, 2000, 2001, 2002. All rights reserved.

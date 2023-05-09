@@ -51,13 +51,28 @@ template <class T>
 constexpr in_place_type_t<T> in_place_type{};
 #endif
 
+/// \brief A class whose instances can hold instances of any
+/// type (including non-copyable and non-movable types).
+///
+/// \pre C++11 compatible compiler.
 class unique_any {
 public:
+    /// \post this->empty() is true.
     constexpr unique_any() noexcept = default;
 
+    /// Move constructor that moves content of
+    /// `other` into new instance and leaves `other` empty.
+    ///
+    /// \post other->empty() is true
+    /// \throws Nothing.
     unique_any(unique_any&& other) noexcept = default;
 
-    // Perfect forwarding of T
+    /// Forwards <code>value</code>, so
+    /// that the initial content of the new instance is equivalent
+    /// in both type and value to `value` before the forward.
+    ///
+    /// \throws std::bad_alloc or any exceptions arising from the move or
+    /// copy constructor of the contained type.
     template<typename T>
     unique_any(T&& value)
       : content(new holder< typename std::decay<T>::type >(std::forward<T>(value)))
@@ -86,10 +101,28 @@ public:
     {
     }
 
+    /// Releases any and all resources used in management of instance.
+    ///
+    /// \throws Nothing.
     ~unique_any() noexcept = default;
 
+    /// Moves content of `rhs` into
+    /// current instance, discarding previous content, so that the
+    /// new content is equivalent in both type and value to the
+    /// content of <code>rhs</code> before move, or empty if `rhs.empty()`.
+    ///
+    /// \post `rhs->empty()` is true
+    /// \throws Nothing.
     unique_any & operator=(unique_any&& rhs) noexcept = default;
 
+    /// Forwards `rhs`,
+    /// discarding previous content, so that the new content of is
+    /// equivalent in both type and value to `rhs` before forward.
+    ///
+    /// \throws std::bad_alloc
+    /// or any exceptions arising from the move or copy constructor of the
+    /// contained type. Assignment satisfies the strong guarantee
+    /// of exception safety.
     template <class T>
     unique_any & operator=(T&& rhs)
     {
@@ -111,22 +144,34 @@ public:
         return raw_ptr->held;
     }
 
+    /// \post this->empty() is true
     void reset() noexcept
     {
         content.reset();
     }
 
+    /// Exchange of the contents of `*this` and `rhs`.
+    ///
+    /// \returns `*this`
+    /// \throws Nothing.
     void swap(unique_any& rhs) noexcept
     {
         content.swap(rhs.content);
     }
 
-
+    /// \returns `true` if instance is not empty, otherwise `false`.
+    /// \throws Nothing.
     bool has_value() const noexcept
     {
         return !!content;
     }
 
+    /// \returns the `typeid` of the
+    /// contained value if instance is non-empty, otherwise
+    /// `typeid(void)`.
+    ///
+    /// Useful for querying against types known either at compile time or
+    /// only at runtime.
     const boost::typeindex::type_info& type() const noexcept
     {
         return content ? content->type() : boost::typeindex::type_id<void>().type_info();
@@ -141,7 +186,6 @@ private: // types
         }
 
         virtual const boost::typeindex::type_info& type() const noexcept = 0;
-
     };
 
     template<typename T>
@@ -169,7 +213,6 @@ private: // types
         T held;
     };
 
-
 private: // representation
     template<typename T>
     friend T * unsafe_any_cast(unique_any *) noexcept;
@@ -177,6 +220,8 @@ private: // representation
     std::unique_ptr<placeholder> content;
 };
 
+/// Exchange of the contents of `lhs` and `rhs`.
+/// \throws Nothing.
 inline void swap(unique_any & lhs, unique_any & rhs) noexcept
 {
     lhs.swap(rhs);
@@ -202,6 +247,8 @@ inline const T * unsafe_any_cast(const unique_any * operand) noexcept
     return anys::unsafe_any_cast<T>(const_cast<unique_any *>(operand));
 }
 
+/// \returns Pointer to a ValueType stored in `operand`, nullptr if
+/// `operand` does not contain specified ValueType.
 template<typename T>
 T * any_cast(unique_any * operand) noexcept
 {
@@ -210,17 +257,20 @@ T * any_cast(unique_any * operand) noexcept
         : nullptr;
 }
 
+/// \returns Const pointer to a ValueType stored in `operand`, nullptr if
+/// `operand` does not contain specified ValueType.
 template<typename T>
 inline const T * any_cast(const unique_any * operand) noexcept
 {
     return anys::any_cast<T>(const_cast<unique_any *>(operand));
 }
 
+/// \returns `T` stored in `operand`
+/// \throws boost::bad_any_cast if `operand` does not contain specified `T`.
 template<typename T>
 T any_cast(unique_any & operand)
 {
     typedef typename std::remove_reference<T>::type nonref;
-
 
     nonref * result = anys::any_cast<nonref>(std::addressof(operand));
     if(!result)
@@ -246,6 +296,8 @@ T any_cast(unique_any & operand)
 #endif
 }
 
+/// \returns `T` stored in `operand`
+/// \throws boost::bad_any_cast if `operand` does not contain specified `T`.
 template<typename T>
 inline T any_cast(const unique_any & operand)
 {
@@ -253,6 +305,8 @@ inline T any_cast(const unique_any & operand)
     return anys::any_cast<const nonref &>(const_cast<unique_any &>(operand));
 }
 
+/// \returns `T` stored in `operand`
+/// \throws boost::bad_any_cast if `operand` does not contain specified `T`.
 template<typename T>
 inline T any_cast(unique_any&& operand)
 {
