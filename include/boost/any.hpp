@@ -8,6 +8,9 @@
 # pragma once
 #endif
 
+/// \file boost/any.hpp
+/// \brief \copybrief boost::any
+
 // what:  variant type boost::any
 // who:   contributed by Kevlin Henney,
 //        with features contributed and bugs found by
@@ -89,7 +92,7 @@ namespace boost
             other.content = 0;
         }
 
-        /// Forwards <code>value</code>, so
+        /// Forwards `value`, so
         /// that the initial content of the new instance is equivalent
         /// in both type and value to `value` before the forward.
         ///
@@ -170,7 +173,7 @@ namespace boost
         /// Moves content of `rhs` into
         /// current instance, discarding previous content, so that the
         /// new content is equivalent in both type and value to the
-        /// content of <code>rhs</code> before move, or empty if
+        /// content of `rhs` before move, or empty if
         /// `rhs.empty()`.
         ///
         /// \pre C++11 compatible compiler.
@@ -357,7 +360,7 @@ namespace boost
     /// \throws boost::bad_any_cast if `operand` does not contain 
     /// specified ValueType.
     template<typename ValueType>
-    ValueType boost::any_cast(any & operand)
+    ValueType any_cast(any & operand)
     {
         typedef BOOST_DEDUCED_TYPENAME remove_reference<ValueType>::type nonref;
 

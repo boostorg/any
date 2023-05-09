@@ -14,6 +14,9 @@
 #   pragma once
 #endif
 
+/// \file boost/any/unique_any.hpp
+/// \brief \copybrief boost::anys::unique_any
+
 #ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
 #error Header <boost/any/unique_any.hpp> requires C++11 compatible compiler with move semantics
 #endif
@@ -41,6 +44,7 @@
 
 namespace boost { namespace anys {
 
+///
 template <class T>
 struct in_place_type_t
 {
@@ -57,19 +61,19 @@ constexpr in_place_type_t<T> in_place_type{};
 /// \pre C++11 compatible compiler.
 class unique_any {
 public:
-    /// \post this->empty() is true.
+    /// \post this->has_value() is false.
     constexpr unique_any() noexcept = default;
 
     /// Move constructor that moves content of
     /// `other` into new instance and leaves `other` empty.
     ///
-    /// \post other->empty() is true
+    /// \post other->has_value() is false.
     /// \throws Nothing.
     unique_any(unique_any&& other) noexcept = default;
 
-    /// Forwards <code>value</code>, so
-    /// that the initial content of the new instance is equivalent
-    /// in both type and value to `value` before the forward.
+    /// Forwards `value`, so
+    /// that the content of the new instance has type `std::decay_t<T>`
+    /// and value is the `value` before the forward.
     ///
     /// \throws std::bad_alloc or any exceptions arising from the move or
     /// copy constructor of the contained type.
@@ -89,12 +93,24 @@ public:
         );
     }
 
+    /// Inplace constructs `T` from forwarded `args...`,
+    /// so that the content of `*this` is equivalent
+    /// in type to `std::decay_t<T>`.
+    ///
+    /// \throws std::bad_alloc or any exceptions arising from the move or
+    /// copy constructor of the contained type.
     template<class T, class... Args>
     explicit unique_any(in_place_type_t<T>, Args&&... args)
       : content(new holder<typename std::decay<T>::type>(std::forward<Args>(args)...))
     {
     }
 
+    /// Inplace constructs `T` from `li` and forwarded `args...`,
+    /// so that the initial content of `*this` is equivalent
+    /// in type to `std::decay_t<T>`.
+    ///
+    /// \throws std::bad_alloc or any exceptions arising from the move or
+    /// copy constructor of the contained type.
     template <class T, class U, class... Args>
     explicit unique_any(in_place_type_t<T>, std::initializer_list<U> il, Args&&... args)
       : content(new holder<typename std::decay<T>::type>(il, std::forward<Args>(args)...))
@@ -130,6 +146,13 @@ public:
         return *this;
     }
 
+    /// Inplace constructs `T` from forwarded `args...`, discarding previous
+    /// content, so that the content of `*this` is equivalent
+    /// in type to `std::decay_t<T>`.
+    ///
+    /// \returns referenece to the content of `*this`.
+    /// \throws std::bad_alloc or any exceptions arising from the move or
+    /// copy constructor of the contained type.
     template<class T, class... Args>
     typename std::decay<T>::type& emplace(Args&&... args) {
         auto* raw_ptr = new holder<typename std::decay<T>::type>(std::forward<Args>(args)...);
@@ -137,6 +160,13 @@ public:
         return raw_ptr->held;
     }
 
+    /// Inplace constructs `T` from `li` and forwarded `args...`, discarding
+    /// previous content, so that the content of `*this` is equivalent
+    /// in type to `std::decay_t<T>`.
+    ///
+    /// \returns referenece to the content of `*this`.
+    /// \throws std::bad_alloc or any exceptions arising from the move or
+    /// copy constructor of the contained type.
     template<class T, class U, class... Args>
     typename std::decay<T>::type& emplace(std::initializer_list<U> il, Args&&... args) {
         auto* raw_ptr = new holder<typename std::decay<T>::type>(il, std::forward<Args>(args)...);
@@ -144,7 +174,7 @@ public:
         return raw_ptr->held;
     }
 
-    /// \post this->empty() is true
+    /// \post this->has_value() is false.
     void reset() noexcept
     {
         content.reset();
@@ -247,8 +277,8 @@ inline const T * unsafe_any_cast(const unique_any * operand) noexcept
     return anys::unsafe_any_cast<T>(const_cast<unique_any *>(operand));
 }
 
-/// \returns Pointer to a ValueType stored in `operand`, nullptr if
-/// `operand` does not contain specified ValueType.
+/// \returns Pointer to a `T` stored in `operand`, nullptr if
+/// `operand` does not contain specified `T`.
 template<typename T>
 T * any_cast(unique_any * operand) noexcept
 {
@@ -257,8 +287,8 @@ T * any_cast(unique_any * operand) noexcept
         : nullptr;
 }
 
-/// \returns Const pointer to a ValueType stored in `operand`, nullptr if
-/// `operand` does not contain specified ValueType.
+/// \returns Const pointer to a `T` stored in `operand`, nullptr if
+/// `operand` does not contain specified `T`.
 template<typename T>
 inline const T * any_cast(const unique_any * operand) noexcept
 {
