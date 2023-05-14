@@ -39,6 +39,7 @@
 
 #include <boost/any/fwd.hpp>
 #include <boost/any/bad_any_cast.hpp>
+#include <boost/any/detail/placeholder.hpp>
 
 #include <boost/type_index.hpp>
 
@@ -78,7 +79,7 @@ public:
     /// \throws std::bad_alloc or any exceptions arising from the move or
     /// copy constructor of the contained type.
     template<typename T>
-    unique_any(T&& value)
+    unique_any(T&& value, typename std::enable_if<!std::is_same<T&&, boost::any&&>::value>::type* = nullptr)
       : content(new holder< typename std::decay<T>::type >(std::forward<T>(value)))
     {
         static_assert(
@@ -87,10 +88,26 @@ public:
         );
 
         static_assert(
-            !boost::anys::detail::is_some_any< typename std::decay<T>::type >::value,
-            "unique_any could be only moved and could not be constructoed from "
-            "other types of any."
+            !std::is_same<unique_any, typename std::decay<T>::type >::value,
+            "boost::anys::unique_any could not be copied, only moved."
         );
+
+        static_assert(
+            !std::is_same<boost::any, typename std::decay<T>::type >::value,
+            "boost::anys::unique_any could be constructed from an rvalue of boost::any, "
+            "not a lvalue."
+        );
+    }
+
+    /// Moves the content of `boost::any` into *this.
+    ///
+    /// \throws Nothing.
+    /// \post `value.empty()` is true.
+    template <class BoostAny>
+    unique_any(BoostAny&& value, typename std::enable_if<std::is_same<BoostAny&&, boost::any&&>::value>::type* = nullptr) noexcept
+    {
+        content.reset(value.content);
+        value.content = nullptr;
     }
 
     /// Inplace constructs `T` from forwarded `args...`,
@@ -156,7 +173,7 @@ public:
     template<class T, class... Args>
     typename std::decay<T>::type& emplace(Args&&... args) {
         auto* raw_ptr = new holder<typename std::decay<T>::type>(std::forward<Args>(args)...);
-        content = std::unique_ptr<placeholder>(raw_ptr);
+        content = std::unique_ptr<boost::anys::detail::placeholder>(raw_ptr);
         return raw_ptr->held;
     }
 
@@ -170,7 +187,7 @@ public:
     template<class T, class U, class... Args>
     typename std::decay<T>::type& emplace(std::initializer_list<U> il, Args&&... args) {
         auto* raw_ptr = new holder<typename std::decay<T>::type>(il, std::forward<Args>(args)...);
-        content = std::unique_ptr<placeholder>(raw_ptr);
+        content = std::unique_ptr<boost::anys::detail::placeholder>(raw_ptr);
         return raw_ptr->held;
     }
 
@@ -209,18 +226,8 @@ public:
 
 private: // types
     /// @cond
-    class BOOST_SYMBOL_VISIBLE placeholder
-    {
-    public:
-        virtual ~placeholder()
-        {
-        }
-
-        virtual const boost::typeindex::type_info& type() const noexcept = 0;
-    };
-
     template<typename T>
-    class holder final: public placeholder
+    class holder final: public boost::anys::detail::placeholder
     {
     public:
         template <class... Args>
@@ -248,7 +255,7 @@ private: // representation
     template<typename T>
     friend T * unsafe_any_cast(unique_any *) noexcept;
 
-    std::unique_ptr<placeholder> content;
+    std::unique_ptr<boost::anys::detail::placeholder> content;
     /// @endcond
 };
 

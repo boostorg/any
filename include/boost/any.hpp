@@ -20,6 +20,7 @@
 
 #include <boost/any/bad_any_cast.hpp>
 #include <boost/any/fwd.hpp>
+#include <boost/any/detail/placeholder.hpp>
 #include <boost/type_index.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/type_traits/decay.hpp>
@@ -240,20 +241,10 @@ namespace boost
     public: // types (public so any_cast can be non-friend)
 #endif
         /// @cond
-        class BOOST_SYMBOL_VISIBLE placeholder
+        class BOOST_SYMBOL_VISIBLE placeholder: public boost::anys::detail::placeholder
         {
-        public: // structors
-
-            virtual ~placeholder()
-            {
-            }
-
-        public: // queries
-
-            virtual const boost::typeindex::type_info& type() const BOOST_NOEXCEPT = 0;
-
+        public:
             virtual placeholder * clone() const = 0;
-
         };
 
         template<typename ValueType>
@@ -301,6 +292,8 @@ namespace boost
     private: // representation
         template<typename ValueType>
         friend ValueType * unsafe_any_cast(any *) BOOST_NOEXCEPT;
+
+        friend class boost::anys::unique_any;
 
 #else
 

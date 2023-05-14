@@ -19,7 +19,9 @@
 
 #include <boost/config/pragma_message.hpp>
 #if defined(BOOST_NO_CXX11_RVALUE_REFERENCES) || \
+    defined(BOOST_NO_CXX11_AUTO_DECLARATIONS) || \
     defined(BOOST_NO_CXX11_CONSTEXPR) || \
+    defined(BOOST_NO_CXX11_NULLPTR) || \
     defined(BOOST_NO_CXX11_NOEXCEPT) || \
     defined(BOOST_NO_CXX11_DEFAULTED_FUNCTIONS) || \
     defined(BOOST_NO_CXX11_FINAL) || \
@@ -48,9 +50,9 @@ template<std::size_t OptimizeForSize = sizeof(void*), std::size_t OptimizeForAli
 class basic_any;
 
 namespace detail {
+
     template <class T>
     struct is_basic_any: public boost::false_type {};
-
 
     template<std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
     struct is_basic_any<boost::anys::basic_any<OptimizeForSize, OptimizeForAlignment> > : public boost::true_type {};
