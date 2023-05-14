@@ -63,6 +63,14 @@ can be used for a generalized function adaptor,
 uniform runtime treatment but support only compile-time template
 parameter conformance.
 
+The [classref boost::anys::unique_any] class
+(based on the [@https://userver.tech/d3/d49/classutils_1_1AnyMovable.html utils::AnyMovable]
+class from the [@https://userver.tech/ 🐙 userver framework]) is a variant value type
+based on the second category. It supports safe checked extraction of that value
+strictly against its type and passing ownership of the value. Think of
+[classref boost::anys::unique_any] as of an alternative to [classref boost::any]
+(or to `std::any`) that does not require copy or move construction from the held type.
+
 [endsect]
 
 [section Examples]
@@ -180,6 +188,26 @@ public:
 };
 ```
 
+The following code demonstrates [classref boost::anys::unique_any] usage for
+implementing HTTP processing with passing of optional user data from the
+authorizer to the HTTP body processing:
+
+```
+void HttpServer::ProcessRequest() const {
+    const auto path = this->ReceiveHttpStartingLine();
+    auto headers = this->ReceiveHeaders();
+
+    boost::anys::unique_any user_data;
+    const auto& user_authorizer = immutable_authorizers_.at(path);
+    if (!user_authorizer(headers, user_data)) {
+        throw Unauthorized();
+    }
+
+    const auto body = this->ReceiveBody();
+    const auto& user_handler = immutable_handlers_.at(this->ReceiveHttpStartingLine());
+    user_handler(body, user_data);
+}
+```
 [endsect]
 
 [section:ValueType ['ValueType] requirements]
