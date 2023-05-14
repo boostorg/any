@@ -150,7 +150,7 @@ public:
     /// content, so that the content of `*this` is equivalent
     /// in type to `std::decay_t<T>`.
     ///
-    /// \returns referenece to the content of `*this`.
+    /// \returns reference to the content of `*this`.
     /// \throws std::bad_alloc or any exceptions arising from the move or
     /// copy constructor of the contained type.
     template<class T, class... Args>
@@ -164,7 +164,7 @@ public:
     /// previous content, so that the content of `*this` is equivalent
     /// in type to `std::decay_t<T>`.
     ///
-    /// \returns referenece to the content of `*this`.
+    /// \returns reference to the content of `*this`.
     /// \throws std::bad_alloc or any exceptions arising from the move or
     /// copy constructor of the contained type.
     template<class T, class U, class... Args>

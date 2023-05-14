@@ -46,7 +46,7 @@ namespace anys {
     /// \forcedlink{ValueType} requirements. Use boost::any instead if not sure.
     ///
     /// boost::anys::basic_any is the drop-in replacement for boost::any
-    /// that provides controll over Small Object Optimization via
+    /// that provides control over Small Object Optimization via
     /// `OptimizeForSize` and `OptimizeForAlignment` template parameters.
     ///
     /// There are certain applications that require boost::any

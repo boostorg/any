@@ -170,7 +170,7 @@ struct basic_tests  // test definitions
         check_false(swapped.empty(), "empty on self swap");
         check_equal(
             swapped.type(), boost::typeindex::type_id<huge_structure>(),
-            "type missmatch on self swap");
+            "type mismatch on self swap");
         check_equal(
             stored.text, boost::any_cast<huge_structure>(swapped).text,
             "comparing against original text on self swap");

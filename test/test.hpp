@@ -26,7 +26,7 @@ namespace any_tests // test tuple comprises name and nullary function (object)
 
         static test make(string_type name, function_type action)
         {
-            test result; // MSVC aggreggate initializer bugs
+            test result; // MSVC aggregate initializer bugs
             result.name   = name;
             result.action = action;
             return result;
