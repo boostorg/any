@@ -35,7 +35,6 @@ static void test_with_func()
     s = boost::any_cast<std::string>(returning_string2());
     s = boost::any_cast<const std::string&>(returning_string2());
 
-#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
 #if !defined(__INTEL_COMPILER) && !defined(__ICL) && (!defined(_MSC_VER) || _MSC_VER != 1600)
     // Intel compiler thinks that it must choose the `any_cast(const any&)` function
     // instead of the `any_cast(const any&&)`.
@@ -54,7 +53,6 @@ static void test_with_func()
 #endif
 
     s = boost::any_cast<std::string&&>(returning_string2());
-#endif
 }
 
 int main() {

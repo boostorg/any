@@ -8,7 +8,15 @@
 
 build-project unique_any ;
 
+import ../../config/checks/config : requires ;
+
 import testing ;
+
+project
+    : source-location .
+    : requirements
+        [ requires cxx11_rvalue_references ]
+    ;
 
 test-suite any :
     [ run any_test.cpp ]
