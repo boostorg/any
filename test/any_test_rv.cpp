@@ -12,18 +12,6 @@
 
 #include "move_test.hpp"
 
-#ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
-
-int main()
-{
-    return EXIT_SUCCESS;
-}
-
-#else
-
 int main() {
     return any_tests::move_tests<boost::any>::run_tests();
 }
-
-#endif
-

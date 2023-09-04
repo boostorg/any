@@ -13,9 +13,6 @@ target_include_directories( boost_any INTERFACE include )
 target_link_libraries( boost_any
     INTERFACE
         Boost::config
-        Boost::core
-        Boost::static_assert
         Boost::throw_exception
         Boost::type_index
-        Boost::type_traits
 )

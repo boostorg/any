@@ -18,8 +18,6 @@
 #include <boost/move/move.hpp>
 #include <boost/type_index.hpp>
 
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-
 namespace any_tests {
 
 template <typename Any>
@@ -108,25 +106,19 @@ struct move_tests // test definitions
         move_copy_conting_class value0;
         move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
-#ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
+
         Any value(boost::move(value0));
-#else
-        Any value(value0);
-#endif
 
         check_false(value.empty(), "empty");
         check_equal(value.type(), boost::typeindex::type_id<move_copy_conting_class>(), "type");
         check_non_null(boost::any_cast<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
 
-#ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
         check_equal(
             move_copy_conting_class::copy_count, 0u,
             "checking copy counts");
         check_equal(
             move_copy_conting_class::moves_count, 1u,
             "checking move counts");
-#endif
-
      }
 
     static void test_move_assignment_from_value()
@@ -135,25 +127,18 @@ struct move_tests // test definitions
         Any value;
         move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
-#ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
         value = boost::move(value0);
-#else
-        value = value0;
-#endif
 
         check_false(value.empty(), "empty");
         check_equal(value.type(), boost::typeindex::type_id<move_copy_conting_class>(), "type");
         check_non_null(boost::any_cast<move_copy_conting_class>(&value), "any_cast<move_copy_conting_class>");
 
-#ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
         check_equal(
             move_copy_conting_class::copy_count, 0u,
             "checking copy counts");
         check_equal(
             move_copy_conting_class::moves_count, 1u,
             "checking move counts");
-#endif
-
     }
 
     static void test_copy_construction_from_value()
@@ -299,5 +284,3 @@ unsigned int move_tests<Any>::move_copy_conting_class::copy_count = 0;
 } // namespace any_tests
 
 #endif // BOOST_ANY_TESTS_MOVE_TEST_HPP_INCLUDED
-
-#endif // MOVE_TEST_INCLUDED

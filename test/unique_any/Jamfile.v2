@@ -15,7 +15,7 @@ import testing ;
 project
     : source-location .
     : requirements
-        [ requires cxx11 ]
+        [ requires cxx11_rvalue_references ]
     ;
 
 test-suite unique_any :

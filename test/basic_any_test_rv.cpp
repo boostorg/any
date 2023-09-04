@@ -13,15 +13,6 @@
 
 #include "move_test.hpp"
 
-#ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
-
-int main()
-{
-    return EXIT_SUCCESS;
-}
-
-#else
-
 int main() {
     const int res1 = any_tests::move_tests<boost::anys::basic_any<> >::run_tests();
     if (res1) return 1;
@@ -36,4 +27,3 @@ int main() {
     if (res4) return 4;
 }
 
-#endif
