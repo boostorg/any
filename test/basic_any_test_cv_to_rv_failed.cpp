@@ -14,14 +14,11 @@
 #include <utility>
 
 #include <boost/any/basic_any.hpp>
-#include "test.hpp"
 
 
-int main()
-{
+int main() {
     boost::anys::basic_any<> const cvalue(10);
     int i = boost::any_cast<int&&>(cvalue);
     (void)i;
-    return EXIT_SUCCESS;
 }
 

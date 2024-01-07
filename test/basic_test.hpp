@@ -18,9 +18,9 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <type_traits>
 
 #include <boost/core/lightweight_test.hpp>
-#include <boost/type_traits/is_base_and_derived.hpp>
 
 namespace any_tests {
 
@@ -225,7 +225,7 @@ struct basic_tests  // test definitions
     static void test_bad_any_cast()
     {
         BOOST_TEST((
-            boost::is_base_and_derived<std::exception, boost::bad_any_cast>::value
+            std::is_base_of<std::exception, boost::bad_any_cast>::value
         ));
 
         BOOST_TEST(
