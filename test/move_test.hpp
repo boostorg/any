@@ -15,7 +15,6 @@
 #include <utility>
 
 #include "test.hpp"
-#include <boost/move/move.hpp>
 #include <boost/type_index.hpp>
 
 namespace any_tests {
@@ -28,7 +27,7 @@ struct move_tests // test definitions
         Any value0 = move_copy_conting_class();
         move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
-        Any value(boost::move(value0));
+        Any value(std::move(value0));
 
         check(value0.empty(), "moved away value is empty");
         check_false(value.empty(), "empty");
@@ -48,7 +47,7 @@ struct move_tests // test definitions
         Any value = move_copy_conting_class();
         move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
-        value = boost::move(value0);
+        value = std::move(value0);
 
         check(value0.empty(), "moved away is empty");
         check_false(value.empty(), "empty");
@@ -107,7 +106,7 @@ struct move_tests // test definitions
         move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
 
-        Any value(boost::move(value0));
+        Any value(std::move(value0));
 
         check_false(value.empty(), "empty");
         check_equal(value.type(), boost::typeindex::type_id<move_copy_conting_class>(), "type");
@@ -127,7 +126,7 @@ struct move_tests // test definitions
         Any value;
         move_copy_conting_class::copy_count = 0;
         move_copy_conting_class::moves_count = 0;
-        value = boost::move(value0);
+        value = std::move(value0);
 
         check_false(value.empty(), "empty");
         check_equal(value.type(), boost::typeindex::type_id<move_copy_conting_class>(), "type");
