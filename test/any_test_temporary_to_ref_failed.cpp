@@ -13,13 +13,10 @@
 #include <utility>
 
 #include <boost/any.hpp>
-#include "test.hpp"
 
 
-int main()
-{
+int main() {
     int i = boost::any_cast<int&>(10);
     (void)i;
-    return EXIT_SUCCESS;
 }
 
