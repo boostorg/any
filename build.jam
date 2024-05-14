@@ -11,11 +11,8 @@ project /boost/any
     : common-requirements
         <library>/boost/assert//boost_assert
         <library>/boost/config//boost_config
-        <library>/boost/core//boost_core
-        <library>/boost/static_assert//boost_static_assert
         <library>/boost/throw_exception//boost_throw_exception
         <library>/boost/type_index//boost_type_index
-        <library>/boost/type_traits//boost_type_traits
         <include>include
     ;
 
