@@ -17,6 +17,7 @@ import testing ;
 project
     : source-location .
     : requirements
+        <library>/boost/any//boost_any
         [ requires cxx11_rvalue_references cxx11_static_assert ]
     ;
 
