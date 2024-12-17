@@ -306,7 +306,7 @@ namespace boost
     template<typename ValueType>
     ValueType any_cast(any & operand)
     {
-        typedef typename std::remove_reference<ValueType>::type nonref;
+        using nonref = typename std::remove_reference<ValueType>::type;
 
         nonref * result = boost::any_cast<nonref>(std::addressof(operand));
         if(!result)
@@ -338,7 +338,7 @@ namespace boost
     template<typename ValueType>
     inline ValueType any_cast(const any & operand)
     {
-        typedef typename std::remove_reference<ValueType>::type nonref;
+        using nonref = typename std::remove_reference<ValueType>::type;
         return boost::any_cast<const nonref &>(const_cast<any &>(operand));
     }
 

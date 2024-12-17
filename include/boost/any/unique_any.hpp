@@ -294,7 +294,7 @@ inline const T * any_cast(const unique_any * operand) noexcept
 template<typename T>
 T any_cast(unique_any & operand)
 {
-    typedef typename std::remove_reference<T>::type nonref;
+    using nonref = typename std::remove_reference<T>::type;
 
     nonref * result = anys::any_cast<nonref>(std::addressof(operand));
     if(!result)
@@ -325,7 +325,7 @@ T any_cast(unique_any & operand)
 template<typename T>
 inline T any_cast(const unique_any & operand)
 {
-    typedef typename std::remove_reference<T>::type nonref;
+    using nonref = typename std::remove_reference<T>::type;
     return anys::any_cast<const nonref &>(const_cast<unique_any &>(operand));
 }
 

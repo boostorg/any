@@ -83,7 +83,7 @@ and copying of any objects:
 #include <boost/any.hpp>
 
 using boost::any_cast;
-typedef std::list<boost::any> many;
+using many = std::list<boost::any>;
 
 void append_int(many & values, int value)
 {
@@ -169,7 +169,7 @@ struct property
     boost::any value;
 };
 
-typedef std::list<property> properties;
+using properties = std::list<property>;
 ```
 
 The following base class demonstrates one approach to
