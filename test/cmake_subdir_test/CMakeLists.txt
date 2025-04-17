@@ -10,8 +10,10 @@ add_subdirectory(../../../assert boostorg/assert)
 add_subdirectory(../../../core boostorg/core)
 add_subdirectory(../../../config boostorg/config)
 add_subdirectory(../../../container_hash boostorg/container_hash)
+add_subdirectory(../../../describe boostorg/describe)
 add_subdirectory(../../../detail boostorg/detail)
 add_subdirectory(../../../integer boostorg/integer)
+add_subdirectory(../../../mp11 boostorg/mp11)
 add_subdirectory(../../../preprocessor boostorg/preprocessor)
 add_subdirectory(../../../static_assert boostorg/static_assert)
 add_subdirectory(../../../throw_exception boostorg/throw_exception)
@@ -26,8 +28,6 @@ if (BOOST_USE_MODULES)
     add_executable(boost_any_module_usage ../modules/usage_sample.cpp)
     target_link_libraries(boost_any_module_usage PRIVATE Boost::any)
     add_test(NAME boost_any_module_usage COMMAND boost_any_module_usage)
-
-
 endif()
 
 list(APPEND RUN_TESTS_SOURCES
