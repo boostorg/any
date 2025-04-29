@@ -20,24 +20,19 @@ if (BOOST_USE_MODULES)
     else()
         message(STATUS "`import std;` is not awailable")
     endif()
-    target_include_directories(boost_any PUBLIC include)
-    target_link_libraries( boost_any
-        PUBLIC
-            Boost::config
-            Boost::throw_exception
-            Boost::type_index
-    )
+    set(__scope PUBLIC)
 else()
     add_library(boost_any INTERFACE)
-    target_include_directories(boost_any INTERFACE include)
-
-    target_link_libraries( boost_any
-        INTERFACE
-            Boost::config
-            Boost::throw_exception
-            Boost::type_index
-    )
+    set(__scope INTERFACE)
 endif()
+
+target_include_directories(boost_any ${__scope} include)
+target_link_libraries( boost_any
+    ${__scope}
+        Boost::config
+        Boost::throw_exception
+        Boost::type_index
+)
 
 add_library( Boost::any ALIAS boost_any )
 
