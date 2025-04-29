@@ -9,7 +9,7 @@ if (BOOST_USE_MODULES)
     add_library(boost_any)
     target_sources(boost_any PUBLIC
         FILE_SET modules_public TYPE CXX_MODULES FILES
-            ${CMAKE_CURRENT_LIST_DIR}/modules/any.cppm
+            ${CMAKE_CURRENT_LIST_DIR}/modules/boost_any.cppm
     )
 
     target_compile_features(boost_any PUBLIC cxx_std_20)
@@ -29,7 +29,7 @@ if (BOOST_USE_MODULES)
     )
 else()
     add_library(boost_any INTERFACE)
-    target_include_directories(boost_type_index INTERFACE include)
+    target_include_directories(boost_any INTERFACE include)
 
     target_link_libraries( boost_any
         INTERFACE
