@@ -254,19 +254,19 @@ benifits of modules without changing the existing code.
 [note For better compile times make sure that `import std;` is available when building the `boost.any` module (in CMake logs there should be
       a 'Using `import std;`' message). ]
 
-If not using CMake, then the module could be build manually from the `modules/any.cppm` file.
+If not using CMake, then the module could be build manually from the `modules/boost_any.cppm` file.
 
 For manual module build the following commands could be used for clang compiler:
 
 ```
 cd any/modules
-clang++ -I ../include -std=c++20 --precompile -x c++-module any.cppm
+clang++ -I ../include -std=c++20 --precompile -x c++-module boost_any.cppm
 ```
 
 After that, the module could be used in the following way:
 
 ```
-clang++ -std=c++20 -fmodule-file=any.pcm any.pcm usage_sample.cpp
+clang++ -std=c++20 -fmodule-file=boost_any.pcm boost_any.pcm usage_sample.cpp
 ```
 
 [endsect]
