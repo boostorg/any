@@ -249,7 +249,7 @@ make the `Boost::any` CMake target provide it. After that an explicit usage of C
 
 The `Boost::any` CMake target gives an ability to mix includes and imports of the library in different translation units. Moreover,
 if `BOOST_USE_MODULES` macro is defined then all the `boost/any...` includes implicilty do `import boost.any;` to give all the
-benifits of modules without changing the existing code.
+benefits of modules without changing the existing code.
 
 [note For better compile times make sure that `import std;` is available when building the `boost.any` module (in CMake logs there should be
       a 'Using `import std;`' message). ]
