@@ -11,7 +11,9 @@ module;
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <boost/throw_exception.hpp>
-#include <boost/type_index.hpp>
+
+// FIXME(CK): #include <boost/type_index.hpp>
+import boost.type_index;
 
 #ifdef BOOST_ANY_USE_STD_MODULE
 import std;
