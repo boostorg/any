@@ -26,9 +26,8 @@ if(BOOST_USE_MODULES)
     endif()
     set(__scope PUBLIC)
 
-    # TODO(CK):
-    # add_executable(module_sample modules/usage_sample.cpp)
-    # (module_sample PRIVATE boost_any)
+    add_executable(module_sample modules/usage_sample.cpp)
+    target_link_libraries(module_sample PRIVATE boost_any)
 else()
     set(CMAKE_VERIFY_INTERFACE_HEADER_SETS ON)
     add_library(boost_any INTERFACE)
@@ -57,9 +56,9 @@ endif()
 target_link_libraries(
     boost_any
     ${__scope}
-    Boost::config
-    Boost::throw_exception
-    Boost::type_index
+        Boost::config
+        Boost::throw_exception
+        Boost::type_index
 )
 
 add_library(Boost::any ALIAS boost_any)

@@ -7,10 +7,46 @@
 // clang++ -std=c++20 -fmodule-file=type_index.pcm type_index.pcm usage_sample.cpp
 
 //[any_module_example
+
+#ifdef BOOST_ANY_USE_STD_MODULE
+import std;
+#else
+# include <sstream>
+# include <string>
+# include <print>
+#endif
+
 import boost.any;
 
-int main() {
-    boost::any a = 42;
+namespace {
+
+    template <typename... Ts> auto any_to_string(const boost::any& a) -> std::string {
+        std::ostringstream oss;
+
+        auto try_cast = [&](auto* dummy) -> bool {
+            using T = std::decay_t<decltype(*dummy)>;
+            if (a.type() == typeid(T)) {
+                oss << boost::any_cast<T>(a);
+                return true;
+            }
+            return false;
+        };
+
+        // Expand over Ts...
+        bool const success = (try_cast((Ts*)nullptr) || ...);
+
+        if (!success) {
+            oss << "<unknown type: " << a.type().name() << ">";
+        }
+        return oss.str();
+    }
+
+}  // namespace
+
+// Usage:
+auto main() -> int {
+    boost::any const a = 42;
+    std::println(stdout, "{}", any_to_string<int, double, std::string>(a));
 }
 //]
 
