@@ -57,7 +57,9 @@ else()
             include/boost/any/detail/config.hpp
             include/boost/any/detail/placeholder.hpp
     )
-    target_compile_features(boost_any ${__scope} cxx_std_17)
+    if(NOT BOOST_USE_MODULES)
+        target_compile_features(boost_any ${__scope} cxx_std_17)
+    endif()
 endif()
 
 if(PROJECT_IS_TOP_LEVEL)
