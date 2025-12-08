@@ -17,7 +17,7 @@ if(BOOST_USE_MODULES)
         PUBLIC
             FILE_SET modules_public
                 TYPE CXX_MODULES
-                FILES ${CMAKE_CURRENT_LIST_DIR}/modules/boost_any.cppm
+                FILES modules/boost_any.cppm
     )
 
     target_compile_features(boost_any PUBLIC cxx_std_20)
