@@ -11,6 +11,9 @@ if(PROJECT_IS_TOP_LEVEL)
 endif()
 
 if(BOOST_USE_MODULES)
+    if(NOT DEFINED CMAKE_CXX_STANDARD)
+        set(CMAKE_CXX_STANDARD 20)
+    endif()
     add_library(boost_any)
     target_sources(
         boost_any
