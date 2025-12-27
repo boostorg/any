@@ -33,10 +33,6 @@ if(BOOST_USE_MODULES)
         message(WARNING "`import std;` is not available")
     endif()
     set(__scope PUBLIC)
-
-    # TODO(CK): unresolved with shared libs?
-    # add_executable(module_sample modules/usage_sample.cpp)
-    # target_link_libraries(module_sample PRIVATE boost_any)
 else()
     set(CMAKE_VERIFY_INTERFACE_HEADER_SETS ${PROJECT_IS_TOP_LEVEL})
     add_library(boost_any INTERFACE)

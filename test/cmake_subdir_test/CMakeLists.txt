@@ -2,7 +2,7 @@
 # Distributed under the Boost Software License, Version 1.0.
 # See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
-cmake_minimum_required(VERSION 3.5...4.0)
+cmake_minimum_required(VERSION 3.21...4.2)
 
 project(any_subdir_test LANGUAGES CXX)
 
@@ -24,8 +24,8 @@ add_subdirectory(../../ boostorg/any)
 
 enable_testing()
 
-if (BOOST_USE_MODULES)
-    add_executable(boost_any_module_usage ../modules/usage_sample.cpp)
+if(BOOST_USE_MODULES)
+    add_executable(boost_any_module_usage ../../modules/usage_sample.cpp)
     target_link_libraries(boost_any_module_usage PRIVATE Boost::any)
     add_test(NAME boost_any_module_usage COMMAND boost_any_module_usage)
 endif()
@@ -47,10 +47,10 @@ list(APPEND RUN_TESTS_SOURCES
     # any_test.cpp  # Ambiguous with modules, because all the anys now available
 )
 
-foreach (testsourcefile ${RUN_TESTS_SOURCES})
+foreach(testsourcefile ${RUN_TESTS_SOURCES})
     get_filename_component(testname ${testsourcefile} NAME_WLE)
     add_executable(${PROJECT_NAME}_${testname} ../${testsourcefile})
-    target_link_libraries(${PROJECT_NAME}_${testname} Boost::any)
+    target_link_libraries(${PROJECT_NAME}_${testname} Boost::any Boost::core)
     add_test(NAME ${PROJECT_NAME}_${testname} COMMAND ${PROJECT_NAME}_${testname})
 endforeach()
 

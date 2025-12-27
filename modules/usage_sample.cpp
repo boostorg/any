@@ -11,9 +11,9 @@
 #ifdef BOOST_ANY_USE_STD_MODULE
 import std;
 #else
+# include <iostream>
 # include <sstream>
 # include <string>
-# include <print>
 #endif
 
 import boost.any;
@@ -46,7 +46,11 @@ namespace {
 // Usage:
 auto main() -> int {
     boost::any const a = 42;
+#ifdef BOOST_ANY_USE_STD_MODULE
     std::println(stdout, "{}", any_to_string<int, double, std::string>(a));
+#else
+    std::cout << any_to_string<int, double, std::string>(a) << '\n';
+#endif
 }
 //]
 
