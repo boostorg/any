@@ -85,7 +85,7 @@ jobs:
           cd ..
           rm -rf __build
 
-      - name: Run modules tests wihtout 'import std;'
+      - name: Run modules tests without 'import std;'
         if: ${{matrix.toolset == 'clang-19'}}
         run: |
           cd ../boost-root/libs/any
@@ -218,7 +218,7 @@ jobs:
           cd ..
           rm -rf build_module
 
-      - name: Run modules tests wihtout 'import std;'
+      - name: Run modules tests without 'import std;'
         if: ${{matrix.toolset == 'msvc-14.3'}}
         shell: cmd
         run: |
@@ -243,8 +243,8 @@ jobs:
     needs: posix
     runs-on: ubuntu-latest
     steps:
-    - name: Coveralls Finished
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.github_token }}
-        parallel-finished: true
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.github_token }}
+          parallel-finished: true
