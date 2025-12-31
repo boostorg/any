@@ -21,6 +21,8 @@ add_subdirectory(../../../type_traits boostorg/type_traits)
 
 add_subdirectory(../../ boostorg/any)
 
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+
 enable_testing()
 
 if (BOOST_USE_MODULES)
