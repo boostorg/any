@@ -21,8 +21,6 @@ add_subdirectory(../../../type_traits boostorg/type_traits)
 
 add_subdirectory(../../ boostorg/any)
 
-set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
-
 enable_testing()
 
 if (BOOST_USE_MODULES)
@@ -51,7 +49,7 @@ list(APPEND RUN_TESTS_SOURCES
 foreach (testsourcefile ${RUN_TESTS_SOURCES})
     get_filename_component(testname ${testsourcefile} NAME_WLE)
     add_executable(${PROJECT_NAME}_${testname} ../${testsourcefile})
-    target_link_libraries(${PROJECT_NAME}_${testname} Boost::any)
+    target_link_libraries(${PROJECT_NAME}_${testname} Boost::any Boost::core)
     add_test(NAME ${PROJECT_NAME}_${testname} COMMAND ${PROJECT_NAME}_${testname})
 endforeach()
 
