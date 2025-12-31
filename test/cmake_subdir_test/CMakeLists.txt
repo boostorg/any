@@ -24,7 +24,7 @@ add_subdirectory(../../ boostorg/any)
 enable_testing()
 
 if (BOOST_USE_MODULES)
-    add_executable(boost_any_module_usage ../modules/usage_sample.cpp)
+    add_executable(boost_any_module_usage ../../modules/usage_sample.cpp)
     target_link_libraries(boost_any_module_usage PRIVATE Boost::any)
     add_test(NAME boost_any_module_usage COMMAND boost_any_module_usage)
 endif()
