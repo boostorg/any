@@ -17,6 +17,9 @@
 #ifdef BOOST_HAS_PRAGMA_ONCE
 # pragma once
 #endif
+
+#include <type_traits>
+
 #endif  // #ifndef BOOST_ANY_INTERFACE_UNIT
 
 /// \file boost/any/fwd.hpp

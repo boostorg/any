@@ -11,12 +11,14 @@ module;
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <boost/throw_exception.hpp>
-#include <boost/type_index.hpp>
+
+#include <memory> // for std::addressof
+
+import boost.type_index;
 
 #ifdef BOOST_ANY_USE_STD_MODULE
 import std;
 #else
-#include <memory>
 #include <stdexcept>
 #include <typeinfo>
 #include <type_traits>
