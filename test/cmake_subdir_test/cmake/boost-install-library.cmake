@@ -348,31 +348,6 @@ function(boost_install_library name)
     endif()
 endfunction()
 
-set(CPACK_PACKAGE_NAME ${install_component_name})
-if(NOT BOOST_PACKAGE_HELP)
-    set(CPACK_COMPONENTS_ALL
-        ${install_component_name}_Runtime
-        ${install_component_name}_Development
-    )
-endif()
 set(CPACK_GENERATOR TGZ)
-
 include(CPack)
 
-cpack_add_component(
-    ${install_component_name}_Runtime
-    DISPLAY_NAME Runtime
-    DESCRIPTION "Shared libraries and executables"
-    REQUIRED
-    INSTALL_TYPES Full Developer Minimal
-)
-cpack_add_component(
-    ${install_component_name}_Development
-    DISPLAY_NAME "Developer pre-requisites"
-    DESCRIPTION "Headers/static libs needed for building"
-    DEPENDS ${install_component_name}_Runtime
-    INSTALL_TYPES Full Developer
-)
-cpack_add_install_type(Full)
-cpack_add_install_type(Minimal)
-cpack_add_install_type(Developer DISPLAY_NAME "SDK Development")
