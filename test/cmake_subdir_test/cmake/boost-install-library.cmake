@@ -23,6 +23,7 @@ include(GNUInstallDirs)
 #     [NAMESPACE <namespace>]
 #     [EXPORT_NAME <export-name>]
 #     [DESTINATION <install-prefix>]
+#     [NO_VERSION_SUFFIX]
 #   )
 #
 # Arguments:
@@ -38,7 +39,7 @@ include(GNUInstallDirs)
 # DEPENDENCIES (optional)
 #   Semicolon-separated list, one dependency per entry.
 #   Each entry is a valid find_dependency() argument list.
-#   Note: you must use the bracket form for quoting if not only a package name is used!
+#   NOTE: you must use the bracket form for quoting if not only a package name is used! CK
 #   "[===[Boost::type_traits 1.0.0]===] [===[Boost::scope 0.0.1 EXACT]===] fmt"
 #
 # NAMESPACE (optional)
@@ -52,6 +53,9 @@ include(GNUInstallDirs)
 # DESTINATION (optional)
 #   The install destination for CXX_MODULES.
 #   Defaults to ${CMAKE_INSTALL_LIBDIR}/cmake/${name}/modules.
+#
+# NO_VERSION_SUFFIX (optional)
+#   option to disable the versioning of install destinations
 #
 # Brief
 # -----
@@ -86,7 +90,7 @@ function(boost_install_library name)
     # ----------------------------
     # Argument parsing
     # ----------------------------
-    set(options)
+    set(options NO_VERSION_SUFFIX)
     set(oneValueArgs NAMESPACE EXPORT_NAME DESTINATION)
     set(multiValueArgs TARGETS DEPENDENCIES)
 
@@ -113,7 +117,16 @@ function(boost_install_library name)
         return()
     endif()
 
-    set(_config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${name}-${PROJECT_VERSION}")
+    # gersemi: off
+    # NOTE: If one of this variables is not set, the default DESTINATION is used! CK
+    if(NOT BOOST_NO_VERSION_SUFFIX)
+        set(_version_suffix "-${PROJECT_VERSION}")
+        set(_include_install_dir DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/boost${_version_suffix})
+        # set(_lib_install_dir DESTINATION ${CMAKE_INSTALL_LIBDIR}/boost${_version_suffix})
+        # set(_bin_install_dir DESTINATION ${CMAKE_INSTALL_BINDIR}/boost${_version_suffix})
+    endif()
+    set(_config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${name}${_version_suffix}")
+    # gersemi: on
 
     # ----------------------------
     # Defaults
@@ -131,7 +144,11 @@ function(boost_install_library name)
     endif()
 
     # XXX string(REPLACE "boost_" "" install_component_name "${name}")
-    set(install_component_name "${name}")
+    set(install_component_name "boost")
+    message(
+        VERBOSE
+        "boost-install-library(${name}): COMPONENT '${install_component_name}'"
+    )
 
     # --------------------------------------------------
     # Install each target with all of its file sets
@@ -164,7 +181,7 @@ function(boost_install_library name)
         )
         message(
             VERBOSE
-            "boost_install_library(${name}): COMPONENT ${component_name} for TARGET '${_tgt}'"
+            "boost_install_library(${name}): EXPORT_NAME ${component_name} for TARGET '${_tgt}'"
         )
 
         # Get the list of interface header sets, exact one expected!
@@ -184,12 +201,13 @@ function(boost_install_library name)
                     APPEND _install_header_set_args
                     FILE_SET
                     "${_install_header_set}"
-                    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/boost-${PROJECT_VERSION}"
-                    # TODO(CK) COMPONENT "${_install_headers_component}"
+                    ${_include_install_dir}
+                    COMPONENT
+                    "${install_component_name}_Development"
                 )
             endforeach()
         else()
-            set(_install_header_set_args FILE_SET HEADERS) # Note: empty FILE_SET in this case! CK
+            set(_install_header_set_args FILE_SET HEADERS) # NOTE: empty FILE_SET in this case! CK
         endif()
 
         # Detect presence of C++ module file sets, exact one expected!
@@ -201,26 +219,41 @@ function(boost_install_library name)
             )
             install(
                 TARGETS "${_tgt}"
-                COMPONENT "${install_component_name}"
                 EXPORT ${BOOST_EXPORT_NAME}
-                ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/Boost-${PROJECT_VERSION}
-                LIBRARY # DESTINATION ${CMAKE_INSTALL_LIBDIR}
-                RUNTIME # DESTINATION ${CMAKE_INSTALL_BINDIR}
-                    ${_install_header_set_args} # DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-                FILE_SET ${_module_sets} DESTINATION "${BOOST_DESTINATION}"
+                ARCHIVE
+                    ${_lib_install_dir}
+                    COMPONENT "${install_component_name}_Development"
+                LIBRARY
+                    ${_lib_install_dir}
+                    COMPONENT "${install_component_name}_Runtime"
+                    NAMELINK_COMPONENT "${install_component_name}_Development"
+                RUNTIME
+                    ${_bin_install_dir}
+                    COMPONENT "${install_component_name}_Runtime"
+                ${_install_header_set_args}
+                FILE_SET ${_module_sets}
+                    DESTINATION "${BOOST_DESTINATION}"
+                    COMPONENT "${install_component_name}_Development"
                 # NOTE: There's currently no convention for this location! CK
                 CXX_MODULES_BMI
                 # TODO(CK): DESTINATION ${_config_install_dir}/bmi-${CMAKE_CXX_COMPILER_ID}_$<CONFIG>
+                COMPONENT "${install_component_name}_Development"
             )
         else()
             install(
                 TARGETS "${_tgt}"
-                COMPONENT "${install_component_name}"
                 EXPORT ${BOOST_EXPORT_NAME}
-                ARCHIVE # DESTINATION ${CMAKE_INSTALL_LIBDIR}
-                LIBRARY # DESTINATION ${CMAKE_INSTALL_LIBDIR}
-                RUNTIME # DESTINATION ${CMAKE_INSTALL_BINDIR}
-                    ${_install_header_set_args} # DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+                ARCHIVE
+                    ${_lib_install_dir}
+                    COMPONENT "${install_component_name}_Development"
+                LIBRARY
+                    ${_lib_install_dir}
+                    COMPONENT "${install_component_name}_Runtime"
+                    NAMELINK_COMPONENT "${install_component_name}_Development"
+                RUNTIME
+                    ${_bin_install_dir}
+                    COMPONENT "${install_component_name}_Runtime"
+                ${_install_header_set_args}
             )
         endif()
     endforeach()
@@ -234,7 +267,7 @@ function(boost_install_library name)
         NAMESPACE ${BOOST_NAMESPACE}
         CXX_MODULES_DIRECTORY cxx-modules
         DESTINATION ${_config_install_dir}
-        COMPONENT "${install_component_name}"
+        COMPONENT "${install_component_name}_Development"
     )
     # gersemi: on
 
@@ -305,7 +338,7 @@ function(boost_install_library name)
                 "${CMAKE_CURRENT_BINARY_DIR}/${name}-config.cmake"
                 "${CMAKE_CURRENT_BINARY_DIR}/${name}-config-version.cmake"
             DESTINATION ${_config_install_dir}
-            COMPONENT "${install_component_name}"
+            COMPONENT "${install_component_name}_Development"
         )
     else()
         message(
@@ -315,5 +348,31 @@ function(boost_install_library name)
     endif()
 endfunction()
 
+set(CPACK_PACKAGE_NAME ${install_component_name})
+if(NOT BOOST_PACKAGE_HELP)
+    set(CPACK_COMPONENTS_ALL
+        ${install_component_name}_Runtime
+        ${install_component_name}_Development
+    )
+endif()
 set(CPACK_GENERATOR TGZ)
+
 include(CPack)
+
+cpack_add_component(
+    ${install_component_name}_Runtime
+    DISPLAY_NAME Runtime
+    DESCRIPTION "Shared libraries and executables"
+    REQUIRED
+    INSTALL_TYPES Full Developer Minimal
+)
+cpack_add_component(
+    ${install_component_name}_Development
+    DISPLAY_NAME "Developer pre-requisites"
+    DESCRIPTION "Headers/static libs needed for building"
+    DEPENDS ${install_component_name}_Runtime
+    INSTALL_TYPES Full Developer
+)
+cpack_add_install_type(Full)
+cpack_add_install_type(Minimal)
+cpack_add_install_type(Developer DISPLAY_NAME "SDK Development")
