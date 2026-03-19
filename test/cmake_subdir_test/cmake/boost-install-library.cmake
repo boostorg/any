@@ -118,6 +118,10 @@ function(boost_install_library name)
     endif()
 
     # gersemi: off
+    set(_version_suffix)
+    set(_include_install_dir)
+    set(_lib_install_dir)
+    set(_bin_install_dir)
     # NOTE: If one of this variables is not set, the default DESTINATION is used! CK
     if(NOT BOOST_NO_VERSION_SUFFIX)
         set(_version_suffix "-${PROJECT_VERSION}")
@@ -140,7 +144,7 @@ function(boost_install_library name)
     endif()
 
     if(NOT BOOST_DESTINATION)
-        set(BOOST_DESTINATION "${_config_install_dir}/modules")
+        set(BOOST_DESTINATION "${_config_install_dir}")
     endif()
 
     # XXX string(REPLACE "boost_" "" install_component_name "${name}")
@@ -236,8 +240,8 @@ function(boost_install_library name)
                     COMPONENT "${install_component_name}_Development"
                 # NOTE: There's currently no convention for this location! CK
                 CXX_MODULES_BMI
-                # TODO(CK): DESTINATION ${_config_install_dir}/bmi-${CMAKE_CXX_COMPILER_ID}_$<CONFIG>
-                COMPONENT "${install_component_name}_Development"
+                    DESTINATION ${_config_install_dir}/bmi-${CMAKE_CXX_COMPILER_ID}_$<CONFIG>
+                    COMPONENT "${install_component_name}_Development"
             )
         else()
             install(

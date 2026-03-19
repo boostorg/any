@@ -10,7 +10,13 @@
 
 #include <boost/any/detail/config.hpp>
 
-#if !defined(BOOST_USE_MODULES) || defined(BOOST_ANY_INTERFACE_UNIT)
+#if defined(BOOST_USE_MODULES) && !defined(BOOST_ANY_INTERFACE_UNIT)
+
+#ifndef BOOST_IN_MODULE_PURVIEW
+// XXX import boost.core;
+#endif
+
+#else
 
 #ifndef BOOST_ANY_INTERFACE_UNIT
 #include <boost/config.hpp>
@@ -69,6 +75,6 @@ namespace detail {
 } // namespace boost
 /// @endcond
 
-#endif  // #if !defined(BOOST_USE_MODULES) || defined(BOOST_ANY_INTERFACE_UNIT)
+#endif  // #if defined(BOOST_USE_MODULES) && !defined(BOOST_ANY_INTERFACE_UNIT)
 
 #endif  // #ifndef BOOST_ANY_ANYS_FWD_HPP

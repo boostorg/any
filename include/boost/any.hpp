@@ -5,7 +5,13 @@
 
 #include <boost/any/detail/config.hpp>
 
-#if !defined(BOOST_USE_MODULES) || defined(BOOST_ANY_INTERFACE_UNIT)
+#if defined(BOOST_USE_MODULES) && !defined(BOOST_ANY_INTERFACE_UNIT)
+
+#ifndef BOOST_IN_MODULE_PURVIEW
+// XXX import boost.core;
+#endif
+
+#else
 
 /// \file boost/any.hpp
 /// \brief \copybrief boost::any
@@ -377,6 +383,6 @@ BOOST_ANY_END_MODULE_EXPORT
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#endif  // #if !defined(BOOST_USE_MODULES) || defined(BOOST_ANY_INTERFACE_UNIT)
+#endif  // #if defined(BOOST_USE_MODULES) // !defined(BOOST_ANY_INTERFACE_UNIT)
 
 #endif

@@ -11,7 +11,13 @@
 
 #include <boost/any/detail/config.hpp>
 
-#if !defined(BOOST_USE_MODULES) || defined(BOOST_ANY_INTERFACE_UNIT)
+#if defined(BOOST_USE_MODULES) && !defined(BOOST_ANY_INTERFACE_UNIT)
+
+#ifndef BOOST_IN_MODULE_PURVIEW
+// XXX import boost.core;
+#endif
+
+#else
 
 #ifndef BOOST_ANY_INTERFACE_UNIT
 #include <boost/config.hpp>
@@ -51,6 +57,6 @@ BOOST_ANY_END_MODULE_EXPORT
 
 } // namespace boost
 
-#endif  // #if !defined(BOOST_USE_MODULES) || defined(BOOST_ANY_INTERFACE_UNIT)
+#endif  // #if defined(BOOST_USE_MODULES) && !defined(BOOST_ANY_INTERFACE_UNIT)
 
 #endif // #ifndef BOOST_ANYS_BAD_ANY_CAST_HPP_INCLUDED
