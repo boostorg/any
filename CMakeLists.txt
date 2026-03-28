@@ -76,7 +76,8 @@ endif()
 # -----------------------------------------------------------------------------
 # Include headers
 # -----------------------------------------------------------------------------
-if(BOOST_USE_MODULES)
+# Note: usable starting with cmake v3.23
+if(NOT CMAKE_VERSION VERSION_LESS 3.23)
     target_sources(
         boost_any
         PUBLIC
@@ -116,5 +117,6 @@ add_library(Boost::any ALIAS boost_any)
 # Testing
 # -----------------------------------------------------------------------------
 if(BUILD_TESTING)
+    enable_testing()
     add_subdirectory(test)
 endif()

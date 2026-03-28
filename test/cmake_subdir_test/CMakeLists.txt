@@ -2,9 +2,37 @@
 # Distributed under the Boost Software License, Version 1.0.
 # See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
+#======================================================================
+# 1. Enable experimental 'import std;' support
+#======================================================================
+# gersemi: off
+if(NOT DEFINED CMAKE_EXPERIMENTAL_CXX_IMPORT_STD)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3 AND CMAKE_VERSION VERSION_LESS 4.4)
+        set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "451f2fe2-a8a2-47c3-bc32-94786d8fc91b")
+    elseif(CMAKE_VERSION VERSION_GREATER_EQUAL 4.2 AND CMAKE_VERSION VERSION_LESS 4.3)
+        set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
+    elseif(CMAKE_VERSION VERSION_GREATER 4.3)
+        message( WARNING "This version of CMake has not been tested for 'import std;'.")
+    endif()
+endif()
+# gersemi: on
+
 cmake_minimum_required(VERSION 3.21...4.3)
 
 project(boost_any LANGUAGES CXX VERSION 1.90.0)
+
+#======================================================================
+# Check if import std; is available for the current toolchain
+#======================================================================
+if(${CMAKE_CXX_STANDARD} IN_LIST CMAKE_CXX_COMPILER_IMPORT_STD)
+    set(CMAKE_CXX_MODULE_STD 1)
+    message(STATUS "Using `import std;`")
+else()
+    message(WARNING "`import std;` is not available for C++${CMAKE_CXX_STANDARD}")
+    set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+    set(CMAKE_CXX_MODULE_STD OFF)
+    set(BOOST_USE_MODULES OFF)
+endif()
 
 add_subdirectory(../../../assert boostorg/assert)
 add_subdirectory(../../../core boostorg/core)
@@ -66,4 +94,3 @@ foreach(testsourcefile ${RUN_TESTS_SOURCES})
     target_link_libraries(${PROJECT_NAME}_${testname} Boost::any Boost::core)
     add_test(NAME ${PROJECT_NAME}_${testname} COMMAND ${PROJECT_NAME}_${testname})
 endforeach()
-
