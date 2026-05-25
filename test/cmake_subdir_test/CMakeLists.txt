@@ -25,7 +25,7 @@ project(boost_any LANGUAGES CXX VERSION 1.90.0)
 # Check if import std; is available for the current toolchain
 #======================================================================
 if(${CMAKE_CXX_STANDARD} IN_LIST CMAKE_CXX_COMPILER_IMPORT_STD)
-    set(CMAKE_CXX_MODULE_STD 1)
+    set(CMAKE_CXX_MODULE_STD ON)
     message(STATUS "Using `import std;`")
 else()
     message(WARNING "`import std;` is not available for C++${CMAKE_CXX_STANDARD}")
