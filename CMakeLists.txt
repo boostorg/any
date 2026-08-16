@@ -6,11 +6,14 @@
 # Distributed under the Boost Software License, Version 1.0.
 # -----------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.21...4.3)
+cmake_minimum_required(VERSION 3.21...4.4)
 
 project(boost_any VERSION "${BOOST_SUPERPROJECT_VERSION}" LANGUAGES CXX)
 
 if(PROJECT_IS_TOP_LEVEL)
+    set(BUILD_TESTING ON)
+    enable_testing()
+    find_package(Threads)
     find_package(Boost 1.90.0 CONFIG)
 endif()
 

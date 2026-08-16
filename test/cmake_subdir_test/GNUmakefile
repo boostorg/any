@@ -38,13 +38,13 @@ ifeq (${hostSystemName},Darwin)
     # XXX export GCOV:="llvm-cov gcov"
   endif
 
-  ### NOTE: to test g++-15:
-  ifeq (${CXX},g++-15)
+  ### NOTE: to test g++-16:
+  ifeq (${CXX},g++-16)
     export GCC_PREFIX:=$(shell brew --prefix gcc)
     export GCC_DIR:=$(shell realpath ${GCC_PREFIX})
     export CMAKE_CXX_STDLIB_MODULES_JSON:=${GCC_DIR}/lib/gcc/current/libstdc++.modules.json
     export CXXFLAGS:=-stdlib=libstdc++
-    # XXX export CXX:=g++-15
+    # XXX export CXX:=g++-16
     # XXX export GCOV:="gcov"
   endif
 
