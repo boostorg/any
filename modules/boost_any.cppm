@@ -11,7 +11,9 @@ module;
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <boost/throw_exception.hpp>
-#include <boost/type_index.hpp>
+
+// Any-specific global module fragment includes.
+// Do not include <boost/type_index.hpp> here!
 
 #ifdef BOOST_ANY_USE_STD_MODULE
 import std;
@@ -26,6 +28,8 @@ import std;
 #define BOOST_ANY_INTERFACE_UNIT
 
 export module boost.any;
+
+import boost.type_index;
 
 #ifdef __clang__
 #   pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
