@@ -125,12 +125,47 @@ void test_swap() {
     BOOST_TEST_EQ(boost::any_cast<std::vector<int>&>(a).data(), vec_data);
 }
 
+#ifdef __cpp_lib_constexpr_new
+constexpr int test_constexpr() {
+    int failures = 0;
+    boost::anys::unique_any a;
+
+    failures += (!a.has_value() ? 0 : 1);
+
+    auto& i = a.emplace<int>(42);
+    failures += (i == 42 ? 0 : 1);
+    failures += (a.has_value() ? 0 : 1);
+    failures += (boost::any_cast<int>(a) == 42 ? 0 : 1);
+    failures += (boost::any_cast<int&>(a) == 42 ? 0 : 1);
+    failures += (boost::anys::any_cast<int&>(a) == 42 ? 0 : 1);
+
+    boost::anys::unique_any b = std::move(a);
+    failures += (!a.has_value() ? 0 : 1);
+    failures += (b.has_value() ? 0 : 1);
+    failures += (boost::anys::any_cast<int&>(b) == 42 ? 0 : 1);
+
+    a = std::move(b);
+    failures += (a.has_value() ? 0 : 1);
+    failures += (!b.has_value() ? 0 : 1);
+
+    a.reset();
+    failures += (!a.has_value() ? 0 : 1);
+    failures += (!b.has_value() ? 0 : 1);
+
+    return failures;
+}
+#endif
+
 int main() {
     test_basic();
     test_const();
     test_bad_any_cast();
     test_destructor();
     test_swap();
+
+#ifdef __cpp_lib_constexpr_new
+    static_assert(test_constexpr() == 0);
+#endif
 
     return boost::report_errors();
 }

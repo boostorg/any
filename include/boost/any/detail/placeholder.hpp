@@ -27,8 +27,8 @@ namespace detail {
 
 class BOOST_SYMBOL_VISIBLE placeholder {
 public:
-    virtual ~placeholder() {}
-    virtual const boost::typeindex::type_info& type() const noexcept = 0;
+    BOOST_ANY_IMPL_CONSTEXPR virtual ~placeholder() {}
+    BOOST_ANY_IMPL_CONSTEXPR virtual const boost::typeindex::type_info& type() const noexcept = 0;
 };
 
 } // namespace detail

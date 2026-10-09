@@ -61,7 +61,7 @@ public:
     ///
     /// \post other->has_value() is false.
     /// \throws Nothing.
-    unique_any(unique_any&& other) noexcept = default;
+    BOOST_ANY_IMPL_CONSTEXPR unique_any(unique_any&& other) noexcept = default;
 
     /// Forwards `value`, so
     /// that the content of the new instance has type `std::decay_t<T>`
@@ -70,7 +70,7 @@ public:
     /// \throws std::bad_alloc or any exceptions arising from the move or
     /// copy constructor of the contained type.
     template<typename T>
-    unique_any(T&& value, typename std::enable_if<!std::is_same<T&&, boost::any&&>::value>::type* = nullptr)
+    BOOST_ANY_IMPL_CONSTEXPR unique_any(T&& value, typename std::enable_if<!std::is_same<T&&, boost::any&&>::value>::type* = nullptr)
       : content(new holder< typename std::decay<T>::type >(std::forward<T>(value)))
     {
         static_assert(
@@ -95,7 +95,7 @@ public:
     /// \throws Nothing.
     /// \post `value.empty()` is true.
     template <class BoostAny>
-    unique_any(BoostAny&& value, typename std::enable_if<std::is_same<BoostAny&&, boost::any&&>::value>::type* = nullptr) noexcept
+    BOOST_ANY_IMPL_CONSTEXPR unique_any(BoostAny&& value, typename std::enable_if<std::is_same<BoostAny&&, boost::any&&>::value>::type* = nullptr) noexcept
     {
         content.reset(value.content);
         value.content = nullptr;
@@ -108,7 +108,7 @@ public:
     /// \throws std::bad_alloc or any exceptions arising from the move or
     /// copy constructor of the contained type.
     template<class T, class... Args>
-    explicit unique_any(in_place_type_t<T>, Args&&... args)
+    BOOST_ANY_IMPL_CONSTEXPR explicit unique_any(in_place_type_t<T>, Args&&... args)
       : content(new holder<typename std::decay<T>::type>(std::forward<Args>(args)...))
     {
     }
@@ -120,7 +120,7 @@ public:
     /// \throws std::bad_alloc or any exceptions arising from the move or
     /// copy constructor of the contained type.
     template <class T, class U, class... Args>
-    explicit unique_any(in_place_type_t<T>, std::initializer_list<U> il, Args&&... args)
+    BOOST_ANY_IMPL_CONSTEXPR explicit unique_any(in_place_type_t<T>, std::initializer_list<U> il, Args&&... args)
       : content(new holder<typename std::decay<T>::type>(il, std::forward<Args>(args)...))
     {
     }
@@ -137,7 +137,7 @@ public:
     ///
     /// \post `rhs->empty()` is true
     /// \throws Nothing.
-    unique_any & operator=(unique_any&& rhs) noexcept = default;
+    BOOST_ANY_IMPL_CONSTEXPR unique_any & operator=(unique_any&& rhs) noexcept = default;
 
     /// Forwards `rhs`,
     /// discarding previous content, so that the new content of is
@@ -148,7 +148,7 @@ public:
     /// contained type. Assignment satisfies the strong guarantee
     /// of exception safety.
     template <class T>
-    unique_any & operator=(T&& rhs)
+    BOOST_ANY_IMPL_CONSTEXPR unique_any & operator=(T&& rhs)
     {
         unique_any(std::forward<T>(rhs)).swap(*this);
         return *this;
@@ -162,7 +162,7 @@ public:
     /// \throws std::bad_alloc or any exceptions arising from the move or
     /// copy constructor of the contained type.
     template<class T, class... Args>
-    typename std::decay<T>::type& emplace(Args&&... args) {
+    BOOST_ANY_IMPL_CONSTEXPR typename std::decay<T>::type& emplace(Args&&... args) {
         auto* raw_ptr = new holder<typename std::decay<T>::type>(std::forward<Args>(args)...);
         content = std::unique_ptr<boost::anys::detail::placeholder>(raw_ptr);
         return raw_ptr->held;
@@ -176,14 +176,14 @@ public:
     /// \throws std::bad_alloc or any exceptions arising from the move or
     /// copy constructor of the contained type.
     template<class T, class U, class... Args>
-    typename std::decay<T>::type& emplace(std::initializer_list<U> il, Args&&... args) {
+    BOOST_ANY_IMPL_CONSTEXPR typename std::decay<T>::type& emplace(std::initializer_list<U> il, Args&&... args) {
         auto* raw_ptr = new holder<typename std::decay<T>::type>(il, std::forward<Args>(args)...);
         content = std::unique_ptr<boost::anys::detail::placeholder>(raw_ptr);
         return raw_ptr->held;
     }
 
     /// \post this->has_value() is false.
-    void reset() noexcept
+    BOOST_ANY_IMPL_CONSTEXPR void reset() noexcept
     {
         content.reset();
     }
@@ -192,14 +192,14 @@ public:
     ///
     /// \returns `*this`
     /// \throws Nothing.
-    void swap(unique_any& rhs) noexcept
+    BOOST_ANY_IMPL_CONSTEXPR void swap(unique_any& rhs) noexcept
     {
         content.swap(rhs.content);
     }
 
     /// \returns `true` if instance is not empty, otherwise `false`.
     /// \throws Nothing.
-    bool has_value() const noexcept
+    BOOST_ANY_IMPL_CONSTEXPR bool has_value() const noexcept
     {
         return !!content;
     }
@@ -210,7 +210,7 @@ public:
     ///
     /// Useful for querying against types known either at compile time or
     /// only at runtime.
-    const boost::typeindex::type_info& type() const noexcept
+    BOOST_ANY_IMPL_CONSTEXPR const boost::typeindex::type_info& type() const noexcept
     {
         return content ? content->type() : boost::typeindex::type_id<void>().type_info();
     }
@@ -222,18 +222,18 @@ private: // types
     {
     public:
         template <class... Args>
-        holder(Args&&... args)
+        BOOST_ANY_IMPL_CONSTEXPR holder(Args&&... args)
           : held(std::forward<Args>(args)...)
         {
         }
 
         template <class U, class... Args>
-        holder(std::initializer_list<U> il, Args&&... args)
+        BOOST_ANY_IMPL_CONSTEXPR holder(std::initializer_list<U> il, Args&&... args)
           : held(il, std::forward<Args>(args)...)
         {
         }
 
-        const boost::typeindex::type_info& type() const noexcept override
+        BOOST_ANY_IMPL_CONSTEXPR const boost::typeindex::type_info& type() const noexcept override
         {
             return boost::typeindex::type_id<T>().type_info();
         }
@@ -244,7 +244,7 @@ private: // types
 
 private: // representation
     template<typename T>
-    friend T * unsafe_any_cast(unique_any *) noexcept;
+    friend BOOST_ANY_IMPL_CONSTEXPR T * unsafe_any_cast(unique_any *) noexcept;
 
     std::unique_ptr<boost::anys::detail::placeholder> content;
     /// @endcond
@@ -252,7 +252,7 @@ private: // representation
 
 /// Exchange of the contents of `lhs` and `rhs`.
 /// \throws Nothing.
-inline void swap(unique_any & lhs, unique_any & rhs) noexcept
+BOOST_ANY_IMPL_CONSTEXPR inline void swap(unique_any & lhs, unique_any & rhs) noexcept
 {
     lhs.swap(rhs);
 }
@@ -265,7 +265,7 @@ inline void swap(unique_any & lhs, unique_any & rhs) noexcept
 // use typeid() comparison, e.g., when our types may travel across
 // different shared libraries.
 template<typename T>
-inline T * unsafe_any_cast(unique_any * operand) noexcept
+BOOST_ANY_IMPL_CONSTEXPR inline T * unsafe_any_cast(unique_any * operand) noexcept
 {
     return std::addressof(
         static_cast<unique_any::holder<T>&>(*operand->content).held
@@ -273,7 +273,7 @@ inline T * unsafe_any_cast(unique_any * operand) noexcept
 }
 
 template<typename T>
-inline const T * unsafe_any_cast(const unique_any * operand) noexcept
+BOOST_ANY_IMPL_CONSTEXPR inline const T * unsafe_any_cast(const unique_any * operand) noexcept
 {
     return anys::unsafe_any_cast<T>(const_cast<unique_any *>(operand));
 }
@@ -282,7 +282,7 @@ inline const T * unsafe_any_cast(const unique_any * operand) noexcept
 /// \returns Pointer to a `T` stored in `operand`, nullptr if
 /// `operand` does not contain specified `T`.
 template<typename T>
-T * any_cast(unique_any * operand) noexcept
+BOOST_ANY_IMPL_CONSTEXPR T * any_cast(unique_any * operand) noexcept
 {
     return operand && operand->type() == boost::typeindex::type_id<T>()
         ? anys::unsafe_any_cast<typename std::remove_cv<T>::type>(operand)
@@ -292,7 +292,7 @@ T * any_cast(unique_any * operand) noexcept
 /// \returns Const pointer to a `T` stored in `operand`, nullptr if
 /// `operand` does not contain specified `T`.
 template<typename T>
-inline const T * any_cast(const unique_any * operand) noexcept
+BOOST_ANY_IMPL_CONSTEXPR inline const T * any_cast(const unique_any * operand) noexcept
 {
     return anys::any_cast<T>(const_cast<unique_any *>(operand));
 }
@@ -300,7 +300,7 @@ inline const T * any_cast(const unique_any * operand) noexcept
 /// \returns `T` stored in `operand`
 /// \throws boost::bad_any_cast if `operand` does not contain specified `T`.
 template<typename T>
-T any_cast(unique_any & operand)
+BOOST_ANY_IMPL_CONSTEXPR T any_cast(unique_any & operand)
 {
     using nonref = typename std::remove_reference<T>::type;
 
@@ -331,7 +331,7 @@ T any_cast(unique_any & operand)
 /// \returns `T` stored in `operand`
 /// \throws boost::bad_any_cast if `operand` does not contain specified `T`.
 template<typename T>
-inline T any_cast(const unique_any & operand)
+BOOST_ANY_IMPL_CONSTEXPR inline T any_cast(const unique_any & operand)
 {
     using nonref = typename std::remove_reference<T>::type;
     return anys::any_cast<const nonref &>(const_cast<unique_any &>(operand));
@@ -340,7 +340,7 @@ inline T any_cast(const unique_any & operand)
 /// \returns `T` stored in `operand`
 /// \throws boost::bad_any_cast if `operand` does not contain specified `T`.
 template<typename T>
-inline T any_cast(unique_any&& operand)
+BOOST_ANY_IMPL_CONSTEXPR inline T any_cast(unique_any&& operand)
 {
     static_assert(
         std::is_rvalue_reference<T&&>::value /*true if T is rvalue or just a value*/
