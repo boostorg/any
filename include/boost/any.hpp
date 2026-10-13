@@ -156,7 +156,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
         ///
         /// \post `rhs->empty()` is true
         /// \throws Nothing.
-        any & operator=(any&& rhs) noexcept
+        BOOST_ANY_IMPL_CONSTEXPR any & operator=(any&& rhs) noexcept
         {
             rhs.swap(*this);
             any().swap(rhs);
@@ -255,7 +255,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
 
     private: // representation
         template<typename ValueType>
-        friend ValueType * unsafe_any_cast(any *) noexcept;
+        friend BOOST_ANY_IMPL_CONSTEXPR ValueType * unsafe_any_cast(any *) noexcept;
 
         friend class boost::anys::unique_any;
 

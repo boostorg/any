@@ -13,7 +13,7 @@
 #  endif
 #endif
 
-#ifdef __cpp_lib_constexpr_new
+#if defined(__cpp_lib_constexpr_new) || defined(BOOST_ANY_DOXYGEN_INVOKED)
 #define BOOST_ANY_IMPL_CONSTEXPR constexpr
 #else
 #define BOOST_ANY_IMPL_CONSTEXPR

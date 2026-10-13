@@ -126,34 +126,62 @@ void test_swap() {
 }
 
 #ifdef __cpp_lib_constexpr_new
+
+#define BOOST_ANY_IMPL_CONSTEXPR_ASSERT(X) \
+    if (!(X)) throw std::runtime_error(#X " is false at " + std::to_string(__LINE__))
+
 constexpr int test_constexpr() {
-    int failures = 0;
     boost::anys::unique_any a;
 
-    failures += (!a.has_value() ? 0 : 1);
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(!a.has_value());
 
     auto& i = a.emplace<int>(42);
-    failures += (i == 42 ? 0 : 1);
-    failures += (a.has_value() ? 0 : 1);
-    failures += (boost::any_cast<int>(a) == 42 ? 0 : 1);
-    failures += (boost::any_cast<int&>(a) == 42 ? 0 : 1);
-    failures += (boost::anys::any_cast<int&>(a) == 42 ? 0 : 1);
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(i == 42);
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(a.has_value());
+
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(boost::any_cast<int>(a) == 42);
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(*boost::unsafe_any_cast<int>(&a) == 42);
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(boost::anys::any_cast<int>(a) == 42);
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(*boost::anys::unsafe_any_cast<int>(&a) == 42);
+
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(boost::any_cast<short>(&a) == nullptr);
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(boost::anys::any_cast<short>(&a) == nullptr);
+
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(boost::any_cast<int&>(a) == 42);
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(boost::anys::any_cast<int&>(a) == 42);
 
     boost::anys::unique_any b = std::move(a);
-    failures += (!a.has_value() ? 0 : 1);
-    failures += (b.has_value() ? 0 : 1);
-    failures += (boost::anys::any_cast<int&>(b) == 42 ? 0 : 1);
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(!a.has_value());
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(b.has_value());
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(boost::anys::any_cast<int&>(b) == 42);
 
     a = std::move(b);
-    failures += (a.has_value() ? 0 : 1);
-    failures += (!b.has_value() ? 0 : 1);
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(a.has_value());
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(!b.has_value());
 
     a.reset();
-    failures += (!a.has_value() ? 0 : 1);
-    failures += (!b.has_value() ? 0 : 1);
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(!a.has_value());
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(!b.has_value());
 
-    return failures;
+    a = 43;
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(a.has_value());
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(boost::any_cast<int>(a) == 43);
+
+    a.swap(b);
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(!a.has_value());
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(b.has_value());
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(boost::any_cast<int>(b) == 43);
+
+    a.swap(b);
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(a.has_value());
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(!b.has_value());
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(boost::any_cast<int>(a) == 43);
+
+    return 0;
 }
+
+#undef BOOST_ANY_IMPL_CONSTEXPR_ASSERT
+
 #endif
 
 int main() {

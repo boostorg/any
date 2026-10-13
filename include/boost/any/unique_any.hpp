@@ -95,7 +95,7 @@ public:
     /// \throws Nothing.
     /// \post `value.empty()` is true.
     template <class BoostAny>
-    BOOST_ANY_IMPL_CONSTEXPR unique_any(BoostAny&& value, typename std::enable_if<std::is_same<BoostAny&&, boost::any&&>::value>::type* = nullptr) noexcept
+    unique_any(BoostAny&& value, typename std::enable_if<std::is_same<BoostAny&&, boost::any&&>::value>::type* = nullptr) noexcept
     {
         content.reset(value.content);
         value.content = nullptr;
