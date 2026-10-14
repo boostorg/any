@@ -109,6 +109,9 @@ constexpr int test_constexpr() {
     BOOST_ANY_IMPL_CONSTEXPR_ASSERT(boost::any_cast<int>(a) == 43);
     BOOST_ANY_IMPL_CONSTEXPR_ASSERT(boost::any_cast<int>(b) == 43);
 
+    const boost::any ca = 44;
+    BOOST_ANY_IMPL_CONSTEXPR_ASSERT(boost::any_cast<int>(ca) == 44);
+
     return 0;
 }
 
