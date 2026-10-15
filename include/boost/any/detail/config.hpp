@@ -7,6 +7,18 @@
 #ifndef BOOST_ANY_ANYS_DETAIL_CONFIG_HPP
 #define BOOST_ANY_ANYS_DETAIL_CONFIG_HPP
 
+#if defined __has_include
+#  if __has_include (<version>)
+#    include <version>
+#  endif
+#endif
+
+#if defined(__cpp_lib_constexpr_new) || defined(BOOST_ANY_DOXYGEN_INVOKED)
+#define BOOST_ANY_IMPL_CONSTEXPR constexpr
+#else
+#define BOOST_ANY_IMPL_CONSTEXPR
+#endif
+
 #ifdef BOOST_ANY_INTERFACE_UNIT
 #   define BOOST_ANY_BEGIN_MODULE_EXPORT export {
 #   define BOOST_ANY_END_MODULE_EXPORT }

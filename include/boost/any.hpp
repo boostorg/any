@@ -58,7 +58,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
         /// \throws std::bad_alloc or any exceptions arising from the copy
         /// constructor of the contained type.
         template<typename ValueType>
-        any(const ValueType & value)
+        BOOST_ANY_IMPL_CONSTEXPR any(const ValueType & value)
           : content(new holder<
                 typename std::remove_cv<typename std::decay<const ValueType>::type>::type
             >(value))
@@ -77,7 +77,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
         /// \throws May fail with a `std::bad_alloc`
         /// exception or any exceptions arising from the copy
         /// constructor of the contained type.
-        any(const any & other)
+        BOOST_ANY_IMPL_CONSTEXPR any(const any & other)
           : content(other.content ? other.content->clone() : 0)
         {
         }
@@ -87,7 +87,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
         ///
         /// \post other->empty() is true
         /// \throws Nothing.
-        any(any&& other) noexcept
+        BOOST_ANY_IMPL_CONSTEXPR any(any&& other) noexcept
           : content(other.content)
         {
             other.content = 0;
@@ -100,7 +100,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
         /// \throws std::bad_alloc or any exceptions arising from the move or
         /// copy constructor of the contained type.
         template<typename ValueType>
-        any(ValueType&& value
+        BOOST_ANY_IMPL_CONSTEXPR any(ValueType&& value
             , typename std::enable_if<!std::is_same<any&, ValueType>::value >::type* = 0 // disable if value has type `any&`
             , typename std::enable_if<!std::is_const<ValueType>::value >::type* = 0) // disable if value has type `const ValueType&&`
           : content(new holder< typename std::decay<ValueType>::type >(std::forward<ValueType>(value)))
@@ -114,7 +114,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
         /// Releases any and all resources used in management of instance.
         ///
         /// \throws Nothing.
-        ~any() noexcept
+        BOOST_ANY_IMPL_CONSTEXPR ~any() noexcept
         {
             delete content;
         }
@@ -125,7 +125,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
         ///
         /// \returns `*this`
         /// \throws Nothing.
-        any & swap(any & rhs) noexcept
+        BOOST_ANY_IMPL_CONSTEXPR any & swap(any & rhs) noexcept
         {
             placeholder* tmp = content;
             content = rhs.content;
@@ -142,7 +142,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
         /// or any exceptions arising from the copy constructor of the
         /// contained type. Assignment satisfies the strong guarantee
         /// of exception safety.
-        any & operator=(const any& rhs)
+        BOOST_ANY_IMPL_CONSTEXPR any & operator=(const any& rhs)
         {
             any(rhs).swap(*this);
             return *this;
@@ -156,7 +156,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
         ///
         /// \post `rhs->empty()` is true
         /// \throws Nothing.
-        any & operator=(any&& rhs) noexcept
+        BOOST_ANY_IMPL_CONSTEXPR any & operator=(any&& rhs) noexcept
         {
             rhs.swap(*this);
             any().swap(rhs);
@@ -173,7 +173,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
         /// contained type. Assignment satisfies the strong guarantee
         /// of exception safety.
         template <class ValueType>
-        any & operator=(ValueType&& rhs)
+        BOOST_ANY_IMPL_CONSTEXPR any & operator=(ValueType&& rhs)
         {
             static_assert(
                 !anys::detail::is_basic_any<typename std::decay<ValueType>::type>::value,
@@ -187,13 +187,13 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
 
         /// \returns `true` if instance is empty, otherwise `false`.
         /// \throws Nothing.
-        bool empty() const noexcept
+        BOOST_ANY_IMPL_CONSTEXPR bool empty() const noexcept
         {
             return !content;
         }
 
         /// \post this->empty() is true
-        void clear() noexcept
+        BOOST_ANY_IMPL_CONSTEXPR void clear() noexcept
         {
             any().swap(*this);
         }
@@ -204,7 +204,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
         ///
         /// Useful for querying against types known either at compile time or
         /// only at runtime.
-        const boost::typeindex::type_info& type() const noexcept
+        BOOST_ANY_IMPL_CONSTEXPR const boost::typeindex::type_info& type() const noexcept
         {
             return content ? content->type() : boost::typeindex::type_id<void>().type_info();
         }
@@ -223,24 +223,24 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
         {
         public: // structors
 
-            holder(const ValueType & value)
+            BOOST_ANY_IMPL_CONSTEXPR holder(const ValueType & value)
               : held(value)
             {
             }
 
-            holder(ValueType&& value)
+            BOOST_ANY_IMPL_CONSTEXPR holder(ValueType&& value)
               : held(static_cast< ValueType&& >(value))
             {
             }
 
         public: // queries
 
-            const boost::typeindex::type_info& type() const noexcept override
+            BOOST_ANY_IMPL_CONSTEXPR const boost::typeindex::type_info& type() const noexcept override
             {
                 return boost::typeindex::type_id<ValueType>().type_info();
             }
 
-            placeholder * clone() const BOOST_OVERRIDE
+            BOOST_ANY_IMPL_CONSTEXPR placeholder * clone() const BOOST_OVERRIDE
             {
                 return new holder(held);
             }
@@ -255,7 +255,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
 
     private: // representation
         template<typename ValueType>
-        friend ValueType * unsafe_any_cast(any *) noexcept;
+        friend BOOST_ANY_IMPL_CONSTEXPR ValueType * unsafe_any_cast(any *) noexcept;
 
         friend class boost::anys::unique_any;
 
@@ -265,7 +265,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
 
     /// Exchange of the contents of `lhs` and `rhs`.
     /// \throws Nothing.
-    inline void swap(any & lhs, any & rhs) noexcept
+    BOOST_ANY_IMPL_CONSTEXPR inline void swap(any & lhs, any & rhs) noexcept
     {
         lhs.swap(rhs);
     }
@@ -278,7 +278,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
     // use typeid() comparison, e.g., when our types may travel across
     // different shared libraries.
     template<typename ValueType>
-    inline ValueType * unsafe_any_cast(any * operand) noexcept
+    BOOST_ANY_IMPL_CONSTEXPR inline ValueType * unsafe_any_cast(any * operand) noexcept
     {
         return std::addressof(
             static_cast<any::holder<ValueType> *>(operand->content)->held
@@ -286,7 +286,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
     }
 
     template<typename ValueType>
-    inline const ValueType * unsafe_any_cast(const any * operand) noexcept
+    BOOST_ANY_IMPL_CONSTEXPR inline const ValueType * unsafe_any_cast(const any * operand) noexcept
     {
         return boost::unsafe_any_cast<ValueType>(const_cast<any *>(operand));
     }
@@ -295,7 +295,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
     /// \returns Pointer to a ValueType stored in `operand`, nullptr if
     /// `operand` does not contain specified `ValueType`.
     template<typename ValueType>
-    ValueType * any_cast(any * operand) noexcept
+    BOOST_ANY_IMPL_CONSTEXPR ValueType * any_cast(any * operand) noexcept
     {
         return operand && operand->type() == boost::typeindex::type_id<ValueType>()
             ? boost::unsafe_any_cast<typename std::remove_cv<ValueType>::type>(operand)
@@ -305,7 +305,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
     /// \returns Const pointer to a ValueType stored in `operand`, nullptr if
     /// `operand` does not contain specified `ValueType`.
     template<typename ValueType>
-    inline const ValueType * any_cast(const any * operand) noexcept
+    BOOST_ANY_IMPL_CONSTEXPR inline const ValueType * any_cast(const any * operand) noexcept
     {
         return boost::any_cast<ValueType>(const_cast<any *>(operand));
     }
@@ -314,7 +314,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
     /// \throws boost::bad_any_cast if `operand` does not contain 
     /// specified ValueType.
     template<typename ValueType>
-    ValueType any_cast(any & operand)
+    BOOST_ANY_IMPL_CONSTEXPR ValueType any_cast(any & operand)
     {
         using nonref = typename std::remove_reference<ValueType>::type;
 
@@ -346,7 +346,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
     /// \throws boost::bad_any_cast if `operand` does not contain 
     /// specified `ValueType`.
     template<typename ValueType>
-    inline ValueType any_cast(const any & operand)
+    BOOST_ANY_IMPL_CONSTEXPR inline ValueType any_cast(const any & operand)
     {
         using nonref = typename std::remove_reference<ValueType>::type;
         return boost::any_cast<const nonref &>(const_cast<any &>(operand));
@@ -356,7 +356,7 @@ BOOST_ANY_BEGIN_MODULE_EXPORT
     /// \throws boost::bad_any_cast if `operand` does not contain 
     /// specified `ValueType`.
     template<typename ValueType>
-    inline ValueType any_cast(any&& operand)
+    BOOST_ANY_IMPL_CONSTEXPR inline ValueType any_cast(any&& operand)
     {
         static_assert(
             std::is_rvalue_reference<ValueType&&>::value /*true if ValueType is rvalue or just a value*/
